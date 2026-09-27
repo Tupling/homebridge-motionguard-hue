@@ -1,0 +1,166 @@
+{
+  "pluginAlias": "HueMotionRestore",
+  "pluginType": "platform",
+  "singular": true,
+  "customUi": true,
+  "headerDisplay": "### MotionGuard for Hue v0.6.1 — Dynamic Motion Lighting\nDiscover Hue lights from the paired bridge, build stable lighting zones, test each zone, and preserve exact pre-motion state.",
+  "footerDisplay": "Each enabled zone exposes a HomeKit Motion Pulse trigger, a per-zone Test control, and a Lighting Active indicator. Use any Apple Home motion source to turn the zone pulse ON.",
+  "x-branding": {
+    "imagePath": "branding/banner.png",
+    "iconPath": "branding/icon.png",
+    "image": "https://raw.githubusercontent.com/Tupling/homebridge-motionguard-hue/main/branding/banner.png",
+    "icon": "https://raw.githubusercontent.com/Tupling/homebridge-motionguard-hue/main/branding/icon.png"
+  },
+  "x-icon": "branding/icon.png",
+  "schema": {
+    "type": "object",
+    "required": [
+      "name",
+      "bridgeHost",
+      "bridgeId",
+      "certificateFingerprint",
+      "hueApplicationKey"
+    ],
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "MotionGuard for Hue"
+      },
+      "bridgeHost": {
+        "title": "Hue Bridge Private IP",
+        "type": "string",
+        "placeholder": "192.168.1.25",
+        "description": "Private or link-local IP address only."
+      },
+      "bridgeId": {
+        "title": "Hue Bridge ID",
+        "type": "string"
+      },
+      "certificateFingerprint": {
+        "title": "Pinned TLS Certificate SHA-256",
+        "type": "string"
+      },
+      "hueApplicationKey": {
+        "title": "Hue Application Key",
+        "type": "string",
+        "x-schema-form": {
+          "type": "password"
+        }
+      },
+      "lights": {
+        "title": "Legacy / Single-Zone Hue Lights",
+        "type": "array",
+        "description": "Backward-compatible single-zone list. The Dynamic Zone Manager can convert this into a managed zone while preserving the existing Ring Motion Pulse accessory.",
+        "items": {
+          "title": "Light Name or ID",
+          "type": "string"
+        }
+      },
+      "zoneManagerVersion": {
+        "title": "Zone Manager Version",
+        "type": "integer",
+        "default": 1
+      },
+      "zones": {
+        "title": "Motion Lighting Zones",
+        "type": "array",
+        "items": {
+          "title": "Zone",
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "title": "Stable Zone ID",
+              "type": "string",
+              "description": "Permanent internal ID used to preserve HomeKit accessory identity when the zone is renamed."
+            },
+            "name": {
+              "title": "Zone Name",
+              "type": "string"
+            },
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "primary": {
+              "title": "Default Test Zone",
+              "type": "boolean",
+              "default": false
+            },
+            "legacyTrigger": {
+              "title": "Preserve Legacy Ring Motion Pulse",
+              "type": "boolean",
+              "default": false
+            },
+            "lights": {
+              "title": "Hue Lights",
+              "type": "array",
+              "items": {
+                "title": "Light Name or ID",
+                "type": "string"
+              }
+            },
+            "brightness": {
+              "title": "Zone Brightness Override (%)",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "colorTemperature": {
+              "title": "Zone White Temperature Override (mirek)",
+              "type": "integer",
+              "minimum": 153,
+              "maximum": 500
+            },
+            "delaySeconds": {
+              "title": "Zone Restore Delay (seconds)",
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 3600
+            },
+            "nightOnly": {
+              "title": "Zone Night Only Override",
+              "type": "boolean"
+            },
+            "maxOverrideSeconds": {
+              "title": "Zone Maximum Override (seconds)",
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 7200
+            }
+          }
+        }
+      },
+      "latitude": {
+        "title": "Latitude (optional)",
+        "type": "number",
+        "minimum": -90,
+        "maximum": 90
+      },
+      "longitude": {
+        "title": "Longitude (optional)",
+        "type": "number",
+        "minimum": -180,
+        "maximum": 180
+      },
+      "maxOverrideSeconds": {
+        "title": "Maximum Override Time",
+        "type": "integer",
+        "default": 600,
+        "minimum": 60,
+        "maximum": 7200
+      },
+      "debug": {
+        "title": "Debug Logging",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  "icon": "https://raw.githubusercontent.com/Tupling/homebridge-motionguard-hue/main/branding/icon.png"
+}
