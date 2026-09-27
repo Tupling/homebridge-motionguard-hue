@@ -1,0 +1,25 @@
+.hmr-shell { padding: 2px 1px 12px; }
+.hmr-zone { border: 1px solid var(--bs-border-color); border-radius: .5rem; margin-bottom: 1rem; overflow: hidden; }
+.hmr-zone:last-child { margin-bottom: 0; }
+.hmr-zone-head { padding: .75rem 1rem; background: rgba(127,127,127,.06); border-bottom: 1px solid var(--bs-border-color); }
+.hmr-zone-body { padding: 1rem; }
+.hmr-zone-id { font-size: .75rem; word-break: break-all; }
+.hmr-light-row { display: flex; gap: .5rem; margin-bottom: .5rem; }
+.hmr-light-row:last-child { margin-bottom: 0; }
+.hmr-option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; }
+.hmr-muted-box { border: 1px dashed var(--bs-border-color); border-radius: .4rem; padding: .75rem; }
+.hmr-zone[data-disabled="true"] .hmr-zone-body { opacity: .82; }
+.hmr-drag-buttons .btn { min-width: 2rem; }
+.hmr-health { border: 1px solid var(--bs-border-color); border-radius: .5rem; padding: .75rem; background: rgba(127,127,127,.04); }
+.hmr-health-dot { width: .75rem; height: .75rem; border-radius: 50%; display: inline-block; background: var(--bs-secondary); }
+.hmr-health-dot[data-state="online"] { background: var(--bs-success); }
+.hmr-health-dot[data-state="offline"] { background: var(--bs-danger); }
+.hmr-light-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .5rem; }
+.hmr-light-choice { border: 1px solid var(--bs-border-color); border-radius: .4rem; padding: .55rem .65rem; min-height: 3.6rem; }
+.hmr-light-choice:hover { background: rgba(127,127,127,.05); }
+.hmr-light-meta { font-size: .72rem; opacity: .72; word-break: break-all; }
+.hmr-feature-badge { font-size: .65rem; font-weight: 500; }
+.hmr-manual-details { margin-top: .7rem; }
+.hmr-zone-services { font-size: .76rem; }
+
+.hmr-brand-icon { width: 56px; height: 56px; flex: 0 0 56px; border-radius: 14px; object-fit: cover; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
