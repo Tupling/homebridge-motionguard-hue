@@ -1,0 +1,34 @@
+{
+  "name": "homebridge-hue-motion-restore",
+  "version": "0.6.1",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "homebridge-hue-motion-restore",
+      "version": "0.6.1",
+      "license": "MIT",
+      "dependencies": {
+        "@homebridge/plugin-ui-utils": "2.2.6"
+      },
+      "engines": {
+        "node": ">=22.0.0 <27.0.0",
+        "homebridge": ">=2.0.0 <3.0.0"
+      },
+      "author": {
+        "name": "Dale Tupling",
+        "url": "https://github.com/Tupling"
+      },
+      "funding": {
+        "type": "custom",
+        "url": "https://paypal.me/daletupling"
+      }
+    },
+    "node_modules/@homebridge/plugin-ui-utils": {
+      "version": "2.2.6",
+      "resolved": "https://registry.npmjs.org/@homebridge/plugin-ui-utils/-/plugin-ui-utils-2.2.6.tgz",
+      "integrity": "sha512-RQggRK/c8goET+yPCoh+UhlmY/LblZ+JLOC7qsrazsjy2nB5fvSfobOADIdNExV+B2H2UZvpw8Mizo78OtjXZQ==",
+      "license": "MIT"
+    }
+  }
+}
