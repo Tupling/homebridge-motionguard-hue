@@ -1,0 +1,57 @@
+{
+  "name": "homebridge-hue-motion-restore",
+  "version": "0.6.1",
+  "description": "MotionGuard for Hue: security-hardened dynamic-zone Homebridge motion lighting with Hue discovery, state restore, per-zone testing, activity status, and restart-safe recovery.",
+  "main": "index.js",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin",
+    "supports-hap",
+    "philips-hue",
+    "homekit",
+    "motion-lighting",
+    "security-lighting"
+  ],
+  "engines": {
+    "node": ">=22.0.0 <27.0.0",
+    "homebridge": ">=2.0.0 <3.0.0"
+  },
+  "scripts": {
+    "check": "node --check index.js && node --check lib/hue-client.js && node --check lib/sun.js && node --check lib/zones.js && node --check scripts/link-hue.js && node --check homebridge-ui/public/index.js && node --check homebridge-ui/server.js && node test/core.test.js && node test/zones.test.js && node test/dynamic-zones.test.js && node test/v050.test.js && node test/branding.test.js && node test/public-release.test.js && node test/security.test.js",
+    "hue-link": "node scripts/link-hue.js",
+    "security-check": "node test/security.test.js"
+  },
+  "displayName": "MotionGuard for Hue",
+  "dependencies": {
+    "@homebridge/plugin-ui-utils": "2.2.6"
+  },
+  "author": {
+    "name": "Dale Tupling",
+    "url": "https://github.com/Tupling"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tupling/homebridge-motionguard-hue.git"
+  },
+  "homepage": "https://github.com/Tupling/homebridge-motionguard-hue#readme",
+  "bugs": {
+    "url": "https://github.com/Tupling/homebridge-motionguard-hue/issues"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "scripts",
+    "homebridge-ui",
+    "config.schema.json",
+    "branding",
+    "assets",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "funding": {
+    "type": "custom",
+    "url": "https://paypal.me/daletupling"
+  }
+}
