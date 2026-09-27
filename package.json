@@ -44,7 +44,6 @@
     "homebridge-ui",
     "config.schema.json",
     "branding",
-    "assets",
     "LICENSE",
     "README.md",
     "SECURITY.md",
@@ -53,5 +52,8 @@
   "funding": {
     "type": "custom",
     "url": "https://paypal.me/daletupling"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
