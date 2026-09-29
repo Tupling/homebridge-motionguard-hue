@@ -1,0 +1,138 @@
+<link rel="stylesheet" href="style.css">
+
+<div class="hmr-shell">
+  <div class="d-flex align-items-center gap-3 mb-3">
+    <img class="hmr-brand-icon" src="../../branding/icon.png" alt="MotionGuard for Hue">
+    <div>
+      <h4 class="mb-1">MotionGuard for Hue</h4>
+      <div class="text-muted">v0.7.0 · Fast Hue response + grouped Apple Home controls</div>
+    </div>
+  </div>
+
+  <div class="hmr-health mb-3">
+    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+      <div>
+        <span id="health-dot" class="hmr-health-dot me-2"></span>
+        <strong id="health-title">Hue Bridge not checked</strong>
+        <div id="health-detail" class="small text-muted mt-1">Use the configured bridge credentials to verify the local connection.</div>
+      </div>
+      <div class="d-flex gap-2">
+        <button id="health-button" type="button" class="btn btn-outline-primary btn-sm">Check Bridge</button>
+        <button id="discover-button" type="button" class="btn btn-primary btn-sm">Discover Lights</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Apple Home experience</h5>
+      <p class="card-text mb-2">Each enabled zone keeps a separate <strong>Motion Pulse</strong> automation target and receives one grouped MotionGuard control accessory.</p>
+      <div class="small text-muted">Motion Lighting (master, brightness, white temperature) · Night Only · Protect Manual Changes · 30s / 60s / 90s / 2m / 5m restore choices · Test Motion Lighting · Restore Now · Lighting Active</div>
+    </div>
+  </div>
+
+  <div id="inventory" class="hmr-muted-box mb-3 d-none">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <strong>Discovered Hue lights</strong>
+      <span id="inventory-count" class="badge bg-secondary"></span>
+    </div>
+    <div id="light-grid" class="hmr-light-grid"></div>
+  </div>
+
+  <div class="mb-2">
+    <h5 class="mb-1">Configuration</h5>
+    <div class="small text-muted">Zone settings below provide startup defaults. Changes made from Apple Home are persisted by MotionGuard.</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  let currentConfig = {};
+
+  const element = (id) => document.getElementById(id);
+  const escapeHtml = (value) => String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+  function normalizeConfig(value) {
+    if (Array.isArray(value)) return value[0] || {};
+    return value && typeof value === 'object' ? value : {};
+  }
+
+  function setHealth(state, title, detail) {
+    const dot = element('health-dot');
+    dot.dataset.state = state || '';
+    element('health-title').textContent = title;
+    element('health-detail').textContent = detail;
+  }
+
+  async function request(path) {
+    currentConfig = normalizeConfig(await homebridge.getPluginConfig());
+    return await homebridge.request(path, currentConfig);
+  }
+
+  async function checkBridge() {
+    const button = element('health-button');
+    button.disabled = true;
+    setHealth('', 'Checking Hue Bridge…', 'Verifying the pinned local connection.');
+    try {
+      const result = await request('/bridge-health');
+      const checked = result.checkedAt ? new Date(result.checkedAt).toLocaleString() : 'just now';
+      setHealth('online', 'Hue Bridge online', `${result.lightCount} light(s) available · checked ${checked}`);
+    } catch (error) {
+      setHealth('offline', 'Hue Bridge unavailable', error?.message || String(error));
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function discoverLights() {
+    const button = element('discover-button');
+    button.disabled = true;
+    try {
+      const result = await request('/discover-lights');
+      setHealth('online', 'Hue Bridge online', `${result.lightCount} light(s) available`);
+      const lights = Array.isArray(result.lights) ? result.lights : [];
+      element('inventory-count').textContent = String(lights.length);
+      element('light-grid').innerHTML = lights.map((light) => {
+        const features = [];
+        if (light.features?.dimming) features.push('Dimming');
+        if (light.features?.colorTemperature) features.push('White temp');
+        if (light.features?.color) features.push('Color');
+        return `<div class="hmr-light-choice">
+          <div class="d-flex align-items-center justify-content-between gap-2">
+            <strong>${escapeHtml(light.name)}</strong>
+            <span class="badge ${light.on ? 'bg-success' : 'bg-secondary'}">${light.on ? 'On' : 'Off'}</span>
+          </div>
+          <div class="hmr-light-meta mt-1">${escapeHtml(light.id)}</div>
+          <div class="mt-1">${features.map((feature) => `<span class="badge bg-secondary hmr-feature-badge me-1">${escapeHtml(feature)}</span>`).join('')}</div>
+        </div>`;
+      }).join('') || '<div class="text-muted small">No Hue lights were returned by the bridge.</div>';
+      element('inventory').classList.remove('d-none');
+    } catch (error) {
+      setHealth('offline', 'Hue discovery failed', error?.message || String(error));
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  window.homebridge.addEventListener('configChanged', (event) => {
+    currentConfig = normalizeConfig(event.data);
+  });
+
+  element('health-button').addEventListener('click', checkBridge);
+  element('discover-button').addEventListener('click', discoverLights);
+
+  (async () => {
+    try {
+      currentConfig = normalizeConfig(await homebridge.getPluginConfig());
+      homebridge.showSchemaForm();
+    } finally {
+      homebridge.hideSpinner();
+    }
+  })();
+})();
+</script>
