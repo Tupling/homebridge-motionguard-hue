@@ -17,7 +17,7 @@
     "homebridge": ">=2.0.0 <3.0.0"
   },
   "scripts": {
-    "check": "node --check index.js && node --check lib/hue-client.js && node --check lib/platform.js && node --check lib/homekit-controls.js && node --check lib/state-store.js && node --check lib/sun.js && node --check lib/zones.js && node --check scripts/link-hue.js && node --check homebridge-ui/server.js && node test/core.test.js && node test/security.test.js",
+    "check": "node --check index.js && node --check lib/hue-client.js && node --check lib/platform.js && node --check lib/homekit-controls.js && node --check lib/state-store.js && node --check lib/sun.js && node --check lib/zones.js && node --check scripts/link-hue.js && node --check homebridge-ui/server.js && node test/core.test.js && node test/security.test.js && node test/packaging.test.js",
     "hue-link": "node scripts/link-hue.js",
     "security-check": "node test/security.test.js"
   },
