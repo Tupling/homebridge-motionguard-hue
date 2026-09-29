@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const {
   mergeV2LightUpdate,
+  normalizeV2Light,
   percentToHueBrightness,
   stateLooksLikeMotion,
   v1LikeStateToV2,
@@ -33,6 +34,24 @@ assert.equal(merged.state.on, true);
 assert.equal(merged.state.ct, 250);
 assert.equal(merged.state.colormode, 'ct');
 assert.equal(merged.state.bri, percentToHueBrightness(80));
+
+const nullTemperatureEvent = mergeV2LightUpdate(merged, {
+  id: 'light-1',
+  type: 'light',
+  color_temperature: { mirek: null, mirek_valid: false },
+});
+assert.equal(nullTemperatureEvent.state.ct, 250);
+assert.equal(nullTemperatureEvent.state.colormode, 'ct');
+
+const normalizedWithoutTemperature = normalizeV2Light({
+  id: 'light-2',
+  type: 'light',
+  on: { on: false },
+  dimming: { brightness: null },
+  color_temperature: { mirek: null, mirek_valid: false },
+});
+assert.equal(Object.hasOwn(normalizedWithoutTemperature.state, 'ct'), false);
+assert.equal(Object.hasOwn(normalizedWithoutTemperature.state, 'bri'), false);
 
 assert.deepEqual(v1LikeStateToV2({ on: true, bri: 254, ct: 200, transitiontime: 0 }), {
   on: { on: true },
