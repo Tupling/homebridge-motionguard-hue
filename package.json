@@ -1,7 +1,7 @@
 {
   "name": "homebridge-hue-motion-restore",
-  "version": "0.6.1",
-  "description": "MotionGuard for Hue: security-hardened dynamic-zone Homebridge motion lighting with Hue discovery, state restore, per-zone testing, activity status, and restart-safe recovery.",
+  "version": "0.7.0",
+  "description": "MotionGuard for Hue: low-latency dynamic-zone Homebridge motion lighting with grouped Apple Home controls, exact state restore, and secure Hue API v2 control.",
   "main": "index.js",
   "license": "MIT",
   "keywords": [
@@ -17,7 +17,7 @@
     "homebridge": ">=2.0.0 <3.0.0"
   },
   "scripts": {
-    "check": "node --check index.js && node --check lib/hue-client.js && node --check lib/sun.js && node --check lib/zones.js && node --check scripts/link-hue.js && node --check homebridge-ui/public/index.js && node --check homebridge-ui/server.js && node test/core.test.js && node test/zones.test.js && node test/dynamic-zones.test.js && node test/v050.test.js && node test/branding.test.js && node test/public-release.test.js && node test/security.test.js",
+    "check": "node --check index.js && node --check lib/hue-client.js && node --check lib/platform.js && node --check lib/homekit-controls.js && node --check lib/state-store.js && node --check lib/sun.js && node --check lib/zones.js && node --check scripts/link-hue.js && node --check homebridge-ui/server.js && node test/core.test.js && node test/security.test.js && node test/packaging.test.js",
     "hue-link": "node scripts/link-hue.js",
     "security-check": "node test/security.test.js"
   },

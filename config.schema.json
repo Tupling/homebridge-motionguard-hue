@@ -3,8 +3,8 @@
   "pluginType": "platform",
   "singular": true,
   "customUi": true,
-  "headerDisplay": "### MotionGuard for Hue v0.6.1 — Dynamic Motion Lighting\nDiscover Hue lights from the paired bridge, build stable lighting zones, test each zone, and preserve exact pre-motion state.",
-  "footerDisplay": "Each enabled zone exposes a HomeKit Motion Pulse trigger, a per-zone Test control, and a Lighting Active indicator. Use any Apple Home motion source to turn the zone pulse ON.",
+  "headerDisplay": "### MotionGuard for Hue v0.7.0 — Fast Motion + Apple Home Controls\nPersistent Hue connections, live bridge state caching, grouped Apple Home controls, and exact pre-motion restore.",
+  "footerDisplay": "Each enabled zone exposes a separate Motion Pulse automation target plus grouped MotionGuard controls in Apple Home. The legacy primary zone preserves Ring Motion Pulse and Hue Motion Restore identities.",
   "x-branding": {
     "imagePath": "branding/banner.png",
     "iconPath": "branding/icon.png",
@@ -48,10 +48,50 @@
           "type": "password"
         }
       },
+      "motionLightingEnabled": {
+        "title": "Motion Lighting Enabled by Default",
+        "type": "boolean",
+        "default": true,
+        "description": "Initial Apple Home Motion Lighting master-switch state. Apple Home changes are persisted."
+      },
+      "brightness": {
+        "title": "Default Motion Brightness (%)",
+        "type": "number",
+        "default": 100,
+        "minimum": 1,
+        "maximum": 100
+      },
+      "colorTemperature": {
+        "title": "Default Motion White Temperature (mirek)",
+        "type": "integer",
+        "default": 200,
+        "minimum": 153,
+        "maximum": 500,
+        "description": "200 mirek is approximately 5000 K. Apple Home exposes this through the Motion Lighting white-temperature control."
+      },
+      "delaySeconds": {
+        "title": "Default Restore Delay (seconds)",
+        "type": "integer",
+        "default": 90,
+        "minimum": 5,
+        "maximum": 3600
+      },
+      "nightOnly": {
+        "title": "Night Only by Default",
+        "type": "boolean",
+        "default": false,
+        "description": "Requires valid latitude and longitude. Motion is blocked when night status cannot be determined."
+      },
+      "protectManualChanges": {
+        "title": "Protect Manual Changes by Default",
+        "type": "boolean",
+        "default": true,
+        "description": "Before restore, verify the lights still match the motion state so a manual change is not overwritten."
+      },
       "lights": {
         "title": "Legacy / Single-Zone Hue Lights",
         "type": "array",
-        "description": "Backward-compatible single-zone list. The Dynamic Zone Manager can convert this into a managed zone while preserving the existing Ring Motion Pulse accessory.",
+        "description": "Backward-compatible single-zone list. The primary legacy zone preserves the existing Ring Motion Pulse accessory.",
         "items": {
           "title": "Light Name or ID",
           "type": "string"
@@ -127,6 +167,10 @@
               "title": "Zone Night Only Override",
               "type": "boolean"
             },
+            "protectManualChanges": {
+              "title": "Zone Protect Manual Changes Override",
+              "type": "boolean"
+            },
             "maxOverrideSeconds": {
               "title": "Zone Maximum Override (seconds)",
               "type": "integer",
@@ -154,6 +198,12 @@
         "default": 600,
         "minimum": 60,
         "maximum": 7200
+      },
+      "performanceLogging": {
+        "title": "Performance Logging",
+        "type": "boolean",
+        "default": false,
+        "description": "Logs trigger-to-Hue timing so delays before MotionGuard can be separated from Hue command latency."
       },
       "debug": {
         "title": "Debug Logging",
