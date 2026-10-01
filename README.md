@@ -1,282 +1,346 @@
+<p align="center">
+  <img src="branding/banner.png" alt="MotionGuard for Hue" width="100%">
+</p>
+
+<p align="center">
+  <strong>Low-latency, state-preserving motion lighting for Philips Hue through Homebridge and Apple Home.</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Tupling/homebridge-motionguard-hue/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Tupling/homebridge-motionguard-hue/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="Homebridge 2.x" src="https://img.shields.io/badge/Homebridge-2.x-491F59">
+  <img alt="Node 22–26" src="https://img.shields.io/badge/Node-22--26-339933">
+  <img alt="Hue API v2" src="https://img.shields.io/badge/Hue%20API-v2-00AEEF">
+  <img alt="Version 0.8.1" src="https://img.shields.io/badge/version-0.8.1-0B84F3">
+</p>
+
+<p align="center">
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#apple-home-setup">Apple Home</a> ·
+  <a href="#security-model">Security</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="https://github.com/Tupling/homebridge-motionguard-hue/issues">Issues</a>
+</p>
+
+---
+
 # MotionGuard for Hue
 
-![MotionGuard for Hue](https://raw.githubusercontent.com/Tupling/homebridge-motionguard-hue/main/branding/banner.png)
+**MotionGuard for Hue** turns Philips Hue lights into responsive motion/security lighting without losing the scene that was already running.
 
-[GitHub](https://github.com/Tupling/homebridge-motionguard-hue) · [Issues](https://github.com/Tupling/homebridge-motionguard-hue/issues)
+When motion occurs, MotionGuard snapshots the selected Hue lights, applies a configurable bright-white motion state, extends the timer when more motion arrives, and restores the exact previous state when the event ends.
 
+It is built for people who want **security-style lighting behavior without sacrificing normal Hue scenes, colors, brightness, or automations**.
 
-## v0.8.0 — Low-Latency Motion Path
+> **Current release: v0.8.1**  
+> Package/platform compatibility names remain `homebridge-hue-motion-restore` and `HueMotionRestore` so existing Homebridge configurations and Apple Home accessory identities continue to work.
 
-Version 0.8.1 keeps the existing Apple Home Motion Trigger workflow and adds a faster Hue runtime. Hue light state is initialized locally and then maintained from the Hue API v2 event stream; when that live cache is healthy, motion snapshots do not wait on a fresh Hue light-list GET. Motion and restore commands are dispatched concurrently rather than sleeping between bulbs.
+## Why MotionGuard?
 
-Performance timing is logged per trigger so you can distinguish upstream Apple Home motion-automation delay from MotionGuard/Hue processing.
+| Capability | MotionGuard for Hue |
+| --- | --- |
+| Trigger source | Any Apple Home / HomeKit-compatible motion source |
+| Hue control | Local Hue API v2 |
+| Motion response | Low-latency cached state + parallel writes |
+| Restore behavior | Exact previous on/off, brightness, color temperature, and XY color where supported |
+| Multi-zone support | Yes |
+| Multi-service Hue fixtures | Yes |
+| Restart recovery | Yes |
+| Manual-change protection | Yes |
+| Night-only mode | Yes |
+| Apple Home controls | Minimal, Standard, or Advanced profiles |
+| Cloud login required | No |
+| Direct Ring login required | No |
 
-### Security note for v0.8.1
+## How it works
 
-The experimental Direct Ring provider introduced in v0.8.0 has been removed from v0.8.1 because its WebRTC dependency chain triggered high-severity npm audit findings. The Hue-side latency improvements remain intact, and Apple Home Motion Trigger continues to be the supported trigger path.
+```text
+Camera / motion sensor detects motion
+                 │
+                 ▼
+Apple Home automation turns Motion Trigger ON
+                 │
+                 ▼
+MotionGuard snapshots current Hue state
+                 │
+                 ▼
+Selected lights switch to motion/security state
+                 │
+          more motion extends timer
+                 │
+                 ▼
+Exact previous Hue state is restored
+```
 
-> Package/platform compatibility names remain `homebridge-hue-motion-restore` and `HueMotionRestore` so existing Homebridge configurations and HomeKit accessory identities continue to work.
+MotionGuard does **not** require a dedicated Ring connection. Ring cameras can be used through their existing Apple Home/Homebridge motion sensor, but the trigger can come from any HomeKit-compatible motion source.
 
-## v0.7.1 — Cleaner Apple Home controls
+## Features
 
-v0.7.1 moves day-to-day operation into **one MotionGuard accessory per zone** and moves setup-heavy options back into the Homebridge UI. The existing Motion Pulse accessory UUID for each zone is reused, so Apple Home automations remain attached while the visible service is renamed **Motion Trigger**.
+### Exact-state restore
 
-The recommended Standard profile exposes Enabled, Night Only, Pause, Motion Trigger, and Override Active. Minimal and Advanced profiles are also available. Pause is now per-zone and configurable from 5 minutes to 24 hours.
+MotionGuard preserves the state that existed before motion:
 
-## v0.7.0 — Multi-service Hue fixtures
+- on/off state;
+- brightness;
+- color temperature;
+- XY color where supported;
+- original state across repeated motion events.
 
-v0.7.0 makes Hue discovery **device-aware**. MotionGuard now groups Hue API v2 `light` services under their owning physical fixture instead of presenting every controllable service as an unrelated flat light. This is designed to support both ordinary single-service fixtures such as Appear and multi-service fixtures such as dual-zone wall lights.
+The first snapshot is retained while motion continues, so repeated triggers extend the timer instead of replacing the state that should eventually be restored.
 
-For a multi-service fixture, the settings UI can:
+### Low-latency Hue path
 
-- select the **entire fixture** at once;
-- select only one individual light service;
-- configure separate motion brightness and white-temperature overrides for each selected light service;
-- inspect the physical device UUID, model, firmware, service IDs, and stable Hue v2 light-service UUIDs.
+v0.8.1 retains the low-latency Hue improvements introduced in v0.8.0:
 
-At runtime, each selected light service is snapshotted and restored independently. Shared-light collision protection also operates at the light-service UUID level, so two zones cannot simultaneously own the same controllable service.
+- persistent pinned-TLS Hue connections;
+- Hue API v2 event-stream state caching;
+- motion snapshots that normally avoid a fresh light-list GET when the live cache is healthy;
+- parallel motion writes;
+- parallel restore writes;
+- per-trigger performance timing logs.
 
-The implementation is generic and does not identify a fixture by the word “Dymera.” It follows the Hue API v2 device → light-service relationship, which also makes it suitable for future Hue fixtures containing multiple controllable light services.
+This makes it easier to distinguish Apple Home automation delay from MotionGuard/Hue processing time.
 
-**Hardware validation note:** v0.7.0 includes simulated dual-service API tests, but a physical Dymera still needs to be connected and discovered before this build should be treated as publicly validated for that model.
+### Dynamic zones
 
-### Night Only diagnostics
+Create independent zones such as:
 
-At startup, MotionGuard now logs the server timezone plus the calculated sunrise/sunset for the configured coordinates. This does not change the Night Only decision logic; it makes clock/location problems much easier to spot.
+- Garage
+- Front Door
+- Side Yard
+- Patio
+- Driveway
 
-## v0.6.1 — Public release candidate
+Each zone can have its own:
 
-v0.6.1 prepares MotionGuard for Hue for public distribution: GitHub/npm metadata, public branding URLs, CI, security and contribution documentation, and Homebridge v2 / current Node LTS engine declarations. Runtime lighting behavior is unchanged from v0.5.3.
+- Hue fixtures or individual light services;
+- brightness;
+- white temperature;
+- restore delay;
+- Night Only behavior;
+- maximum override duration;
+- enabled/paused state.
 
-## v0.5.2 — Branding compatibility fix
+Zones use permanent internal IDs, so renaming a zone does not create a new HomeKit identity or break its Motion Trigger automation.
 
-v0.5.2 keeps the v0.5.0 custom UI loading path intact and embeds the settings-screen icon directly so Homebridge does not need to serve nested UI image assets. Runtime behavior is unchanged.
+### Device-aware Hue discovery
 
-## v0.5.0 — Discovery, health, and per-zone Home controls
+The Homebridge settings UI discovers Hue API v2 devices and groups their controllable `light` services under the physical fixture.
 
-MotionGuard for Hue is a local-first Homebridge plugin that turns Philips Hue lights into state-preserving motion/security lighting using motion events already available in Apple Home.
+This supports:
 
-It does **not** log in to Ring or require a second camera connection. Any HomeKit-compatible motion source can trigger a zone by turning that zone's **Motion Trigger** switch ON.
+- standard single-service Hue fixtures;
+- whole-fixture selection;
+- individual light-service selection;
+- multi-service fixtures;
+- per-light-service brightness and white-temperature overrides;
+- device UUID, model, firmware, service ID, and light-service UUID inspection.
 
-The lighting workflow is:
+The implementation follows the Hue API v2 device → light-service relationship rather than hard-coding specific fixture models.
 
-1. A camera or motion sensor detects motion.
-2. Apple Home turns ON the matching zone's **Motion Trigger** switch.
-3. MotionGuard snapshots the selected Hue light states.
-4. Those lights change to the configured bright-white security state.
-5. Additional motion extends the timer without replacing the original snapshot.
-6. The exact previous state is restored when the timer expires.
-
-The plugin preserves on/off state, brightness, color temperature, and XY color where supported. Manual-change protection can prevent the plugin from restoring over a light that someone changed while a motion override was active.
-
----
-
-## What's new in v0.5.0
-
-### New product name
-
-The user-facing product name is now **MotionGuard for Hue**. The npm/package name and Homebridge platform alias are intentionally unchanged to preserve upgrades:
-
-- package: `homebridge-hue-motion-restore`
-- platform: `HueMotionRestore`
-
-Existing Hue pairing credentials, cached accessories, zone IDs, and Apple Home automations remain compatible.
-
-### Secure Hue light discovery
-
-The custom Homebridge settings screen can now query the already-paired Hue Bridge and present discovered lights as selectable choices.
-
-- Discovery uses Hue API v2.
-- The same pinned TLS certificate fingerprint and Bridge ID checks used by runtime control are enforced.
-- The Hue application key is sent only to the configured private/link-local Hue Bridge.
-- The browser UI does not make direct network requests.
-- A temporary Homebridge custom-UI helper process performs discovery through Homebridge's supported local IPC API.
-- Selected lights are stored by stable Hue API v2 resource UUID when chosen through discovery.
-- Manual names/IDs remain supported as a fallback.
-
-### Bridge health
-
-The settings screen now shows live Hue Bridge health after a discovery check:
-
-- online/offline state;
-- number of discovered lights;
-- last check time;
-- useful error text if pinned TLS, identity, authorization, or connectivity fails.
-
-Runtime Hue inventory requests also maintain an internal bridge-health state used for logging and the Homebridge settings health card.
-
-### Per-zone operational controls
-
-v0.7.1 consolidates the earlier per-zone Test/Lighting Active presentation into configurable Apple Home exposure profiles. Standard exposes **Override Active**; Advanced additionally exposes **Test** and **Restore Now**.
-
----
-
-## Dynamic Zone Manager
-
-From **Homebridge → Plugins → MotionGuard for Hue → Settings**, users can:
-
-- add zones;
-- remove zones;
-- rename zones;
-- reorder zones;
-- enable or disable zones;
-- stage disabled zones with zero Hue lights;
-- discover Hue lights from the paired bridge;
-- assign/remove entire fixtures or individual light services with checkboxes;
-- configure per-light-service brightness / white-temperature overrides when desired;
-- inspect multi-service fixture topology and stable Hue v2 service UUIDs;
-- use manual light names/IDs when needed;
-- choose the primary zone used to preserve shared settings/recovery ownership;
-- set per-zone brightness, color temperature, restore delay, Night Only behavior, and maximum override duration.
-
-Every managed zone receives a permanent internal ID. Renaming a zone therefore does **not** create a new HomeKit identity or break the automation connected to that zone's Motion Trigger service.
-
-### Staged zones
-
-A zone can exist before its hardware does.
-
-Example:
-
-- `Garage` — disabled, zero lights
-- `Front Door` — disabled, zero lights
-
-After installing four Hue Appear fixtures, press **Discover / Refresh Lights**, select two lights for Garage and two for Front Door, enable the zones, save, and restart the child bridge.
-
-No placeholder/fake Hue devices are required.
-
----
-
-## Apple Home experience
-
-MotionGuard v0.7.1 presents **one controller accessory per managed zone**. Existing Motion Pulse accessory UUIDs are reused during upgrade so existing Apple Home automations remain attached.
-
-The default **Standard** profile exposes these services inside each zone accessory:
-
-1. **Enabled** — enables or disables automatic motion lighting for that zone. Turning it OFF immediately restores an active override.
-2. **Night Only** — controls the zone's runtime Night Only behavior.
-3. **Pause** — temporarily suspends automatic motion for the configured Pause duration and then turns itself back off.
-4. **Motion Trigger** — automation target. Turn this ON from an Apple Home motion automation. MotionGuard self-resets it.
-5. **Override Active** — read-only motion-sensor status showing whether MotionGuard currently owns an active override snapshot for that zone.
-
-The Apple Home accessory is named **`MotionGuard — <Zone Name>`**.
+> Multi-service behavior has simulated API coverage. Physical validation is still recommended for new multi-service fixture models.
 
 ### Apple Home exposure profiles
 
-Choose the profile in the MotionGuard Homebridge UI:
+MotionGuard presents **one controller accessory per managed zone**.
 
-- **Minimal** — Enabled, Pause, Motion Trigger.
-- **Standard — recommended** — Minimal plus Night Only and Override Active.
-- **Advanced** — Standard plus Protect Manual Changes, Test, and Restore Now.
+**Standard — recommended**
 
-Brightness, white temperature, restore delay, operating mode, multi-service fixture configuration, and other setup options stay in the Homebridge UI instead of cluttering Apple Home.
+- Enabled
+- Night Only
+- Pause
+- Motion Trigger
+- Override Active
 
-### Pause
+**Minimal**
 
-Pause is now **per zone**. Set the duration in the MotionGuard UI from 5 minutes to 24 hours. Enabling Pause restores that zone if it is currently overridden, blocks new automatic triggers, and automatically resumes when the timer expires. The pause deadline is persisted in the zone accessory context across Homebridge restarts.
+- Enabled
+- Pause
+- Motion Trigger
 
-### Operating modes
+**Advanced**
 
-Operating mode is configured in the MotionGuard UI:
+- everything in Standard;
+- Protect Manual Changes;
+- Test;
+- Restore Now.
 
-- **Normal** — uses normal settings and honors Night Only.
-- **Night** — bypasses Night Only while retaining configured brightness.
-- **Away** — allows automatic motion 24/7 and forces motion brightness to 100%.
-- **Party** — blocks automatic motion and restores active overrides.
+Configuration-heavy controls remain in Homebridge so Apple Home stays focused on day-to-day operation.
 
-The motion source does not need to be Ring. Any Apple Home sensor/camera/automation that can turn the zone's Motion Trigger switch ON can trigger it.
+### Restart recovery
+
+Before an override, MotionGuard persists:
+
+- original light state;
+- expected motion state;
+- override start time;
+- restore deadline;
+- hard-stop deadline.
+
+If Homebridge restarts during an active override, MotionGuard recovers the saved state and either re-arms the remaining timer or restores immediately when appropriate.
+
+### Shared-light protection
+
+A Hue light may appear in more than one zone, but two active zones will not simultaneously take ownership of the same controllable light service.
+
+If one zone already owns a light's active snapshot, a later zone safely skips that shared light until the first zone restores it.
 
 ---
 
-## Example planned installation
+## Requirements
 
-### Garage
+- Homebridge **2.x**
+- Node.js **22–26**
+- Philips Hue Bridge reachable on the local network
+- Hue API v2 application key
+- Apple Home / HomeKit-compatible motion source
+- Private or link-local Hue Bridge address
 
-- Garage Appear Left
-- Garage Appear Right
+MotionGuard is designed to run locally alongside Homebridge.
 
-### Front Door
+## Quick start
 
-- Front Door Appear Left
-- Front Door Appear Right
+### 1. Add the plugin to Homebridge
 
-Automation flow:
+The compatibility package name is:
 
 ```text
-Garage camera motion
-        ↓
-MotionGuard — Garage / Motion Trigger ON
-        ↓
-Garage Appear Left + Right → configured motion white
-        ↓
-Override Active = detected
-        ↓
-restore previous state
-        ↓
-Override Active = clear
-
-Front doorbell motion
-        ↓
-MotionGuard — Front Door / Motion Trigger ON
-        ↓
-Front Door lights → configured motion state
-        ↓
-restore previous state
+homebridge-hue-motion-restore
 ```
+
+The Homebridge platform identifier is:
+
+```text
+HueMotionRestore
+```
+
+If you are using this repository as a local plugin, keep the working plugin directory at:
+
+```text
+/var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
+```
+
+### 2. Pair securely with the Hue Bridge
+
+From the plugin directory:
+
+```bash
+npm run hue-link -- 192.168.1.25
+```
+
+Then:
+
+1. verify the displayed Bridge ID;
+2. press the physical button on the Hue Bridge;
+3. press Enter when prompted;
+4. save the returned Hue application key securely.
+
+Existing MotionGuard / Hue Motion Restore upgrades do not require Hue re-pairing.
+
+### 3. Open MotionGuard settings
+
+In Homebridge:
+
+**Plugins → MotionGuard for Hue → Settings**
+
+The custom settings UI can:
+
+- check Hue Bridge health;
+- discover Hue devices and light services;
+- create, remove, rename, reorder, enable, or stage zones;
+- assign whole fixtures or individual light services;
+- configure motion behavior;
+- choose the Apple Home exposure profile.
+
+### 4. Create a zone
+
+Example:
+
+```text
+Garage
+├── Garage Appear Left
+└── Garage Appear Right
+
+Front Door
+├── Front Door Appear Left
+└── Front Door Appear Right
+```
+
+A zone may be created while disabled and with zero Hue lights, allowing hardware to be installed later without creating placeholder devices.
+
+### 5. Save and restart the child bridge
+
+Configuration changes take effect after the Homebridge child bridge restarts.
 
 ---
 
-## Apple Home automation setup
+## Apple Home setup
 
 For each zone:
 
 1. Open **Home → Automation → + → A Sensor Detects Something**.
 2. Select the camera or motion sensor.
 3. Choose **Detects Motion**.
-4. Select the matching **MotionGuard — <Zone Name>** accessory and its **Motion Trigger** service.
-5. Set **Motion Trigger** to **ON**.
-6. Save.
+4. Select the matching **MotionGuard — `<Zone Name>`** accessory.
+5. Select its **Motion Trigger** service.
+6. Set **Motion Trigger** to **ON**.
+7. Save.
 
 Do **not** add an OFF action. MotionGuard resets Motion Trigger automatically so the next motion event can trigger it again.
 
----
+### Example
 
-## Exact-state restore and restart recovery
-
-Before changing any Hue light, MotionGuard persists:
-
-- the original light state;
-- the expected motion state;
-- override start time;
-- restore deadline;
-- hard-stop deadline.
-
-If Homebridge restarts during an override, MotionGuard recovers the saved state and either re-arms the remaining restore timer or restores immediately if the deadline passed.
-
-If a zone was removed or disabled while Homebridge was down, an active persisted override from that zone is restored during startup rather than abandoned.
-
-With **Protect Manual Changes** enabled, failure to verify current Hue state causes restore to defer and retry instead of blindly overwriting a light.
-
-### Shared-light protection
-
-A Hue light may be listed in multiple zones, but two active zones do not control the same light simultaneously. If one zone already owns a light's active snapshot, a later zone safely skips that shared light until the first zone restores it.
-
----
-
-## Backward compatibility
-
-A legacy configuration remains valid:
-
-```json
-"lights": [
-  "Outdoor Spotlight 1"
-]
+```text
+Garage camera motion
+        ↓
+MotionGuard — Garage / Motion Trigger ON
+        ↓
+Garage Hue lights → configured motion state
+        ↓
+Override Active = detected
+        ↓
+restore previous state
+        ↓
+Override Active = clear
 ```
 
-No Hue re-pairing is required when upgrading.
+The trigger does not need to come from Ring. Any compatible Apple Home sensor, camera, or automation capable of switching Motion Trigger ON can initiate the zone.
 
-The Dynamic Zone Manager can convert that configuration into a managed zone while preserving the existing Ring Motion Pulse UUID.
+---
 
-Existing v0.3/v0.4 managed zone IDs and legacy-trigger ownership are preserved.
+## Operating modes
+
+Configured from the MotionGuard Homebridge UI:
+
+| Mode | Behavior |
+| --- | --- |
+| **Normal** | Uses normal settings and honors Night Only |
+| **Night** | Bypasses Night Only while retaining configured brightness |
+| **Away** | Allows automatic motion 24/7 and forces motion brightness to 100% |
+| **Party** | Blocks automatic motion and restores active overrides |
+
+### Pause
+
+Pause is configured per zone from **5 minutes to 24 hours**.
+
+Turning Pause on:
+
+1. restores that zone if it is currently overridden;
+2. blocks new automatic triggers;
+3. automatically resumes when the pause period expires.
+
+The pause deadline is persisted across Homebridge restarts.
+
+---
+
+## Protect Manual Changes
+
+When enabled, MotionGuard avoids blindly restoring over a light that someone changed during an active motion override.
+
+If current Hue state cannot be verified, restore is deferred and retried instead of overwriting the light immediately.
 
 ---
 
@@ -296,46 +360,56 @@ Runtime Hue control and configuration discovery are intentionally local and narr
 - Oversized Hue responses are rejected.
 - The runtime plugin opens no inbound listener and no additional TCP port.
 - The browser configuration UI makes no direct network requests.
-- The custom UI server is a temporary child process started by Homebridge only while the plugin settings UI is open.
-- The UI server reuses the exact same pinned `HueClient` as runtime control.
-- The only added production dependency is the official Homebridge `@homebridge/plugin-ui-utils` package, pinned to version `2.2.6`; it currently has no transitive npm dependencies.
+- The custom UI server exists only while the Homebridge settings UI is open.
+- The UI server reuses the same pinned `HueClient` used by runtime control.
+- The production UI helper dependency is the official `@homebridge/plugin-ui-utils` package pinned to `2.2.6`.
 - The Hue application key is not intentionally written to logs.
 
-No software can guarantee that a system is impossible to compromise. The Homebridge host, router, Apple account/home hubs, Hue Bridge, and administrator credentials remain part of the security boundary.
+The Homebridge host, router, Apple account/home hubs, Hue Bridge, and administrator credentials remain part of the security boundary.
 
-Do not port-forward Homebridge or Hue services to the Internet.
+**Do not port-forward Homebridge or Hue services to the Internet.**
+
+### v0.8.1 security change
+
+The experimental Direct Ring provider from v0.8.0 was removed after its WebRTC dependency chain triggered high-severity npm audit findings.
+
+The Hue-side latency improvements remain in v0.8.1, and Apple Home Motion Trigger remains the supported trigger path.
 
 ---
 
-## Secure Hue pairing
+## Backward compatibility
 
-For first-time setup:
+The user-facing product name is **MotionGuard for Hue**, while these compatibility identifiers remain unchanged:
 
-```bash
-npm run hue-link -- 192.168.1.25
+```text
+package:  homebridge-hue-motion-restore
+platform: HueMotionRestore
 ```
 
-Verify the Bridge ID, press the physical Hue Bridge button, and press Enter when prompted. Keep the returned Hue application key private.
+Legacy configuration remains valid:
 
-Upgrades from previous Hue Motion Restore / MotionGuard versions do not require pairing again.
+```json
+"lights": [
+  "Outdoor Spotlight 1"
+]
+```
+
+Existing Hue pairing credentials, cached accessories, zone IDs, and Apple Home automation identities are preserved across supported upgrades.
+
+The Dynamic Zone Manager can convert a legacy configuration into a managed zone while preserving the existing motion-trigger accessory identity.
 
 ---
 
 ## Ubuntu / native Homebridge local-plugin upgrade
 
-If the working local plugin is located at:
-
-```text
-/var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
-```
-
-extract and test the package:
+Example workflow:
 
 ```bash
-rm -rf ~/Downloads/hmr050
-mkdir -p ~/Downloads/hmr050
-unzip ~/Downloads/homebridge-hue-motion-restore-0.7.1.zip -d ~/Downloads/hmr071
-cd ~/Downloads/hmr071/homebridge-hue-motion-restore
+rm -rf ~/Downloads/hmr081
+mkdir -p ~/Downloads/hmr081
+unzip ~/Downloads/homebridge-hue-motion-restore-0.8.1.zip -d ~/Downloads/hmr081
+cd ~/Downloads/hmr081/homebridge-hue-motion-restore
+
 export PATH="/opt/homebridge/bin:$PATH"
 npm run check
 ```
@@ -343,17 +417,25 @@ npm run check
 Replace the existing source:
 
 ```bash
-sudo rsync -a --delete ~/Downloads/hmr071/homebridge-hue-motion-restore/ /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore/
-sudo chown -R homebridge:homebridge /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
+sudo rsync -a --delete \
+  ~/Downloads/hmr081/homebridge-hue-motion-restore/ \
+  /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore/
+
+sudo chown -R homebridge:homebridge \
+  /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
 ```
 
-Install the pinned official custom-UI helper as the `homebridge` service user:
+Install the pinned custom-UI helper as the Homebridge service user:
 
 ```bash
-sudo -u homebridge env PATH="/opt/homebridge/bin:$PATH" /opt/homebridge/bin/npm ci --omit=dev --ignore-scripts --prefix /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
+sudo -u homebridge env PATH="/opt/homebridge/bin:$PATH" \
+  /opt/homebridge/bin/npm ci \
+  --omit=dev \
+  --ignore-scripts \
+  --prefix /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
 ```
 
-Then restart:
+Restart Homebridge:
 
 ```bash
 sudo hb-service restart
@@ -367,8 +449,6 @@ An existing symlink at:
 
 can remain in place.
 
-After restart, open **Plugins → MotionGuard for Hue → Settings**. The screen should automatically perform a secure discovery check when valid Hue credentials are present.
-
 ---
 
 ## Self-test
@@ -379,36 +459,29 @@ Run:
 npm run check
 ```
 
-Expected result:
-
-```text
-core tests passed
-zone and persistence tests passed
-dynamic zone manager tests passed
-v0.7.1 UI compatibility tests passed
-multi-service fixture tests passed
-v0.7.1 HomeKit UX tests passed
-v0.7.1 HomeKit runtime migration tests passed
-security tests passed
-```
-
-The suite checks:
+The check covers syntax and the project's test/validation path for:
 
 - Hue state conversion and restore behavior;
 - zone normalization and inheritance;
-- dynamic/staged zone behavior;
-- stable v0.3/v0.4 trigger migration;
+- dynamic/staged zones;
+- stable trigger migration;
 - restart persistence;
-- HomeKit exposure profiles, per-zone controls, and legacy Motion Trigger identity preservation;
+- Apple Home exposure profiles;
 - custom UI discovery wiring;
-- Hue feature inventory normalization;
-- bridge-health runtime wrapping;
+- Hue device/service inventory normalization;
+- bridge-health wrapping;
 - private-address enforcement;
 - TLS/certificate-pinning guardrails;
-- API-v2 header authentication;
-- absence of plaintext HTTP and custom inbound listeners;
-- absence of browser-side direct network calls;
-- dependency allow-listing for the official Homebridge custom-UI helper.
+- Hue API v2 authentication;
+- dependency/security guardrails.
+
+For dependency auditing:
+
+```bash
+npm run security-check
+```
+
+CI runs through GitHub Actions on the supported project path.
 
 ---
 
@@ -416,7 +489,29 @@ The suite checks:
 
 - Advanced Hue gradient segment/effect metadata is not currently snapshot/restored.
 - Configuration changes take effect after the Homebridge child bridge restarts.
-- Bridge health in the Homebridge settings screen is checked when the UI is opened/refreshed; it is not a high-frequency background monitor.
+- Bridge health in the settings screen is checked when the UI is opened/refreshed; it is not a high-frequency background monitor.
+- New multi-service fixture models should be physically validated even though the device/service architecture is generic.
+
+---
+
+## Project links
+
+- [Changelog](CHANGELOG.md)
+- [Security policy](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Issue tracker](https://github.com/Tupling/homebridge-motionguard-hue/issues)
+- [GitHub Actions](https://github.com/Tupling/homebridge-motionguard-hue/actions)
+- [Support development](https://paypal.me/daletupling)
+
+---
+
+## Branding
+
+Primary project assets are stored in [`branding/`](branding/).
+
+- `banner.png` — README / project banner
+- `icon.png` — MotionGuard icon
+- `social-preview.jpg` — repository sharing / social preview artwork
 
 ---
 
