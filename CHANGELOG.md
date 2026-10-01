@@ -1,43 +1,65 @@
 # Changelog
 
-All notable changes to MotionGuard for Hue are documented here.
+## 0.8.1
 
-## [0.7.0] - 2026-09-29
+- Removed the experimental Direct Ring provider and `ring-client-api` dependency after npm audit reported high-severity findings in its transitive WebRTC/IP dependency chain.
+- Retained persistent Hue connections, Hue API v2 live-state caching, parallel motion writes, parallel restore, and performance timing logs.
+- Preserved all existing Apple Home Motion Trigger identities and zone configuration compatibility.
+- Configuration UI removes stale Direct Ring credentials/settings when the plugin configuration is next saved.
 
-### Added
-- Grouped Apple Home controls for every enabled MotionGuard zone.
-- Native **Motion Lighting** light service with master enable, brightness, and white-temperature controls.
-- Apple Home switches for **Night Only** and **Protect Manual Changes**.
-- Discrete Apple Home restore-duration choices for 30 seconds, 60 seconds, 90 seconds, 2 minutes, and 5 minutes.
-- Self-resetting **Test Motion Lighting** and **Restore Now** controls.
-- Read-only **Lighting Active** status.
-- Persistent HomeKit control-state storage and restart-safe active snapshot recovery.
-- Hue API v2 event-stream state cache using `/eventstream/clip/v2`.
-- Optional performance logging for trigger-to-Hue latency diagnostics.
-- Focused runtime and security tests.
-- Required Homebridge custom UI entry point with Hue bridge health and light discovery.
+
+## 0.8.0
+
+- Added a low-latency Hue path with persistent pinned-TLS connections.
+- Added Hue API v2 event-stream state caching so motion snapshots normally avoid a bridge GET.
+- Changed motion activation and restore writes to run concurrently instead of sleeping 110 ms per light.
+- Added per-trigger performance timing logs.
+- Added optional Direct Ring Fast Trigger using a dedicated Ring refresh token and per-zone camera mappings.
+- Preserved existing Apple Home Motion Trigger services and stable accessory identities as the fallback/parallel trigger path.
+- Added persistent handling of Ring refresh-token rotation in Homebridge accessory context.
+
+## [0.7.1] - 2026-09-28
 
 ### Changed
-- Hue HTTPS connections now use pinned, persistent keep-alive sockets instead of opening a new TLS session for every request.
-- Multi-light motion and restore commands are dispatched concurrently.
-- Initial motion snapshots use the live Hue cache and fall back to a direct bridge read only when needed.
-- Repeated motion extends the active restore timer without replacing the original pre-motion snapshot.
-- **Protect Manual Changes** verifies current state before restore and retries later rather than overwriting when state verification is unavailable.
-- The legacy primary zone continues to reuse **Ring Motion Pulse** and **Hue Motion Restore** accessories when they already exist.
-- Package validation now checks the runtime files and tests actually shipped in the repository.
+- Reworked Apple Home presentation to one MotionGuard controller accessory per zone while preserving each zone's existing Motion Pulse accessory UUID.
+- Added HomeKit exposure profiles: Minimal, Standard (recommended), and Advanced.
+- Removed brightness, color temperature, delay presets, security-mode switches, and other configuration clutter from the default Apple Home experience.
+- Added per-zone Enabled, Pause, Night Only, Motion Trigger, and Override Active controls in the Standard profile.
+- Added Protect Manual Changes, Test, and Restore Now to the Advanced profile.
+- Pause is now per-zone and its duration is configurable from 5 minutes to 24 hours.
+- Migrates legacy global accessory state and active-override recovery data into the primary zone controller, then removes the obsolete global HomeKit settings accessory.
+- Added Homebridge UI fields for global brightness, white temperature, restore delay, Night Only default, manual-change protection, operating mode, HomeKit exposure profile, and Pause duration.
 
-### Security
-- TLS certificate fingerprint pinning and Hue Bridge identity validation remain required.
-- Hue Bridge addresses remain restricted to private or link-local IP space.
-- Event-stream traffic uses the same pinned TLS agent as normal Hue API v2 requests.
-- Hue event parsing now ignores `null` numeric values instead of coercing them to zero.
+### Compatibility
+- Package/platform IDs remain unchanged.
+- Existing Motion Pulse accessory identities are retained, so existing Apple Home motion automations should stay attached.
+- Existing v0.7.0 Hue device/multi-service support and exact-state restore behavior remain intact.
 
-## [0.6.1] - 2026-09-27
+## [0.7.0] - 2026-09-28
+
+### Added
+- Device-aware Hue API v2 discovery that groups `light` services under their owning physical Hue `device`.
+- Generic multi-service fixture support for dual-zone and future multi-light Hue fixtures without hard-coding a product model.
+- Whole-fixture selection plus individual light-service selection in the Homebridge custom UI.
+- Optional per-light-service motion brightness and color-temperature overrides keyed by stable Hue v2 light-service UUID.
+- Device Inspector showing device UUID, model/firmware metadata, service IDs, service names, and light-service UUIDs.
+- Runtime timezone, sunrise, sunset, and current Night Only diagnostic logging at startup.
+- Multi-service fixture unit tests and configuration migration coverage.
+
+### Compatibility
+- Existing package/platform IDs remain `homebridge-hue-motion-restore` / `HueMotionRestore`.
+- Existing zones and HomeKit Motion Pulse accessory identities are preserved.
+- Existing single-service fixtures continue to use the same snapshot, override, manual-change protection, and exact-restore path.
+- v0.7.0 has API-model test coverage for dual-service fixtures; physical Dymera hardware validation is still required before public release.
+
+## [0.6.1] - 2026-09-26
 
 - Added official GitHub repository metadata.
 - Added PayPal funding metadata and GitHub funding configuration.
 - Added public release documentation and branding URLs.
 - No motion-lighting runtime behavior changes from v0.6.0.
+
+All notable changes to MotionGuard for Hue are documented here.
 
 ## 0.6.0 - 2026-09-27
 

@@ -1,138 +1,178 @@
-<link rel="stylesheet" href="style.css">
-
 <div class="hmr-shell">
-  <div class="d-flex align-items-center gap-3 mb-3">
-    <img class="hmr-brand-icon" src="../../branding/icon.png" alt="MotionGuard for Hue">
-    <div>
-      <h4 class="mb-1">MotionGuard for Hue</h4>
-      <div class="text-muted">v0.7.0 · Fast Hue response + grouped Apple Home controls</div>
+  <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <img src="https://raw.githubusercontent.com/Tupling/homebridge-motionguard-hue/main/branding/icon.png" alt="MotionGuard for Hue icon" class="hmr-brand-icon" width="56" height="56">
+      <div>
+        <h4 class="mb-1">MotionGuard for Hue</h4>
+        <div class="text-muted small">Device-aware motion lighting with exact-state restore</div>
+      </div>
+    </div>
+    <span class="badge text-bg-secondary" id="versionBadge">v0.7.1</span>
+  </div>
+
+  <div id="legacyBanner" class="alert alert-info d-none">
+    <div class="fw-semibold">Legacy Hue Motion Restore configuration detected</div>
+    <div class="small mt-1">Convert it into a managed zone without breaking the existing Ring Motion Pulse automation.</div>
+    <div class="input-group mt-2">
+      <input id="legacyZoneName" class="form-control" value="Garage" aria-label="Converted zone name">
+      <button id="convertLegacy" class="btn btn-outline-primary" type="button">Convert to Dynamic Zone</button>
     </div>
   </div>
 
-  <div class="hmr-health mb-3">
-    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+  <div class="card mb-3">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div>
-        <span id="health-dot" class="hmr-health-dot me-2"></span>
-        <strong id="health-title">Hue Bridge not checked</strong>
-        <div id="health-detail" class="small text-muted mt-1">Use the configured bridge credentials to verify the local connection.</div>
+        <div class="fw-semibold">Hue Bridge</div>
+        <div class="small text-muted">Pinned HTTPS connection used by both runtime control and local light discovery.</div>
       </div>
-      <div class="d-flex gap-2">
-        <button id="health-button" type="button" class="btn btn-outline-primary btn-sm">Check Bridge</button>
-        <button id="discover-button" type="button" class="btn btn-primary btn-sm">Discover Lights</button>
+      <button id="discoverLights" class="btn btn-outline-primary btn-sm" type="button">Discover / Refresh Lights</button>
+    </div>
+    <div class="card-body">
+      <div class="hmr-health mb-3" id="bridgeHealth">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="hmr-health-dot" id="healthDot"></span>
+            <strong id="healthTitle">Bridge status unknown</strong>
+          </div>
+          <span class="badge text-bg-secondary" id="healthBadge">Not checked</span>
+        </div>
+        <div class="small text-muted mt-1" id="healthDetail">Open this screen with valid Hue credentials, or press Discover / Refresh Lights.</div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="name">HomeKit Controller Name</label>
+          <input class="form-control config-field" id="name" data-key="name" type="text">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="bridgeHost">Bridge Private IP</label>
+          <input class="form-control config-field" id="bridgeHost" data-key="bridgeHost" type="text" placeholder="192.168.1.25">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="bridgeId">Bridge ID</label>
+          <input class="form-control config-field font-monospace" id="bridgeId" data-key="bridgeId" type="text">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="certificateFingerprint">Pinned TLS SHA-256</label>
+          <input class="form-control config-field font-monospace" id="certificateFingerprint" data-key="certificateFingerprint" type="text">
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="hueApplicationKey">Hue Application Key</label>
+          <div class="input-group">
+            <input class="form-control config-field font-monospace" id="hueApplicationKey" data-key="hueApplicationKey" type="password" autocomplete="off">
+            <button id="toggleKey" class="btn btn-outline-secondary" type="button">Show</button>
+          </div>
+          <div class="form-text">Kept in Homebridge configuration. Discovery is performed by a temporary local Homebridge UI helper and the key is sent only to your pinned local Hue Bridge.</div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2">
+      <div>
+        <div class="fw-semibold">Motion Lighting Zones</div>
+        <div class="small text-muted">Add, remove, stage, rename, and assign whole Hue fixtures or individual light services. Multi-zone fixtures are grouped automatically.</div>
+      </div>
+      <button id="addZone" class="btn btn-primary btn-sm" type="button">+ Add Zone</button>
+    </div>
     <div class="card-body">
-      <h5 class="card-title">Apple Home experience</h5>
-      <p class="card-text mb-2">Each enabled zone keeps a separate <strong>Motion Pulse</strong> automation target and receives one grouped MotionGuard control accessory.</p>
-      <div class="small text-muted">Motion Lighting (master, brightness, white temperature) · Night Only · Protect Manual Changes · 30s / 60s / 90s / 2m / 5m restore choices · Test Motion Lighting · Restore Now · Lighting Active</div>
+      <div id="discoveryHint" class="alert alert-secondary small d-none"></div>
+      <div id="zoneEmpty" class="text-center text-muted py-4 d-none">No dynamic zones yet.</div>
+      <div id="zones"></div>
     </div>
   </div>
 
-  <div id="inventory" class="hmr-muted-box mb-3 d-none">
-    <div class="d-flex align-items-center justify-content-between mb-2">
-      <strong>Discovered Hue lights</strong>
-      <span id="inventory-count" class="badge bg-secondary"></span>
+  <div class="card mb-3">
+    <div class="card-header">
+      <div class="fw-semibold">MotionGuard Settings</div>
+      <div class="small text-muted">Configure behavior here; Apple Home stays focused on day-to-day controls.</div>
     </div>
-    <div id="light-grid" class="hmr-light-grid"></div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="brightness">Default Motion Brightness (%)</label>
+          <input class="form-control config-field" id="brightness" data-key="brightness" data-number="true" data-default-value="100" type="number" min="1" max="100" step="1">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="colorTemperature">Default White Temperature (mirek)</label>
+          <input class="form-control config-field" id="colorTemperature" data-key="colorTemperature" data-number="true" data-default-value="200" type="number" min="153" max="500" step="1">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="delaySeconds">Default Restore Delay (seconds)</label>
+          <input class="form-control config-field" id="delaySeconds" data-key="delaySeconds" data-number="true" data-default-value="90" type="number" min="5" max="3600" step="1">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="homekitProfile">Apple Home Exposure</label>
+          <select class="form-select config-field" id="homekitProfile" data-key="homekitProfile" data-default-value="standard">
+            <option value="minimal">Minimal</option>
+            <option value="standard">Standard — Recommended</option>
+            <option value="advanced">Advanced</option>
+          </select>
+          <div class="form-text">Standard shows Enabled, Night Only, Pause, Motion Trigger, and Override Active for each zone.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="pauseDurationMinutes">Pause Duration (minutes)</label>
+          <input class="form-control config-field" id="pauseDurationMinutes" data-key="pauseDurationMinutes" data-number="true" data-default-value="60" type="number" min="5" max="1440" step="1">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="securityMode">Operating Mode</label>
+          <select class="form-select config-field" id="securityMode" data-key="securityMode" data-default-value="normal">
+            <option value="normal">Normal</option>
+            <option value="night">Night</option>
+            <option value="away">Away</option>
+            <option value="party">Party</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="latitude">Latitude</label>
+          <input class="form-control config-field" id="latitude" data-key="latitude" data-number="true" type="number" min="-90" max="90" step="any">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="longitude">Longitude</label>
+          <input class="form-control config-field" id="longitude" data-key="longitude" data-number="true" type="number" min="-180" max="180" step="any">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="maxOverrideSeconds">Maximum Override (seconds)</label>
+          <input class="form-control config-field" id="maxOverrideSeconds" data-key="maxOverrideSeconds" data-number="true" type="number" min="60" max="7200" step="1">
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-check form-switch">
+            <input class="form-check-input config-field" id="nightOnly" data-key="nightOnly" data-boolean="true" data-default-boolean="false" type="checkbox">
+            <label class="form-check-label" for="nightOnly">Default Night Only</label>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-check form-switch">
+            <input class="form-check-input config-field" id="protectManualChanges" data-key="protectManualChanges" data-boolean="true" data-default-boolean="true" type="checkbox">
+            <label class="form-check-label" for="protectManualChanges">Protect Manual Changes</label>
+          </div>
+        </div>
+        <div class="col-12"><hr><div class="fw-semibold mb-2">Low-Latency Triggering</div></div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-check form-switch">
+            <input class="form-check-input config-field" id="performanceLogging" data-key="performanceLogging" data-boolean="true" data-default-boolean="true" type="checkbox">
+            <label class="form-check-label" for="performanceLogging">Performance Timing Logs</label>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-check form-switch">
+            <input class="form-check-input config-field" id="debug" data-key="debug" data-boolean="true" type="checkbox">
+            <label class="form-check-label" for="debug">Debug Logging</label>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="mb-2">
-    <h5 class="mb-1">Configuration</h5>
-    <div class="small text-muted">Zone settings below provide startup defaults. Changes made from Apple Home are persisted by MotionGuard.</div>
+  <div class="alert alert-secondary small mb-0">
+    Click Homebridge's <strong>Save</strong> button after editing and restart the child bridge when prompted. Disabled zones may have zero lights and remain staged for future hardware. Existing Motion Trigger identities are preserved; the selected Apple Home Exposure profile controls which additional services appear inside each MotionGuard zone accessory.
   </div>
 </div>
 
-<script>
-(() => {
-  let currentConfig = {};
-
-  const element = (id) => document.getElementById(id);
-  const escapeHtml = (value) => String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-
-  function normalizeConfig(value) {
-    if (Array.isArray(value)) return value[0] || {};
-    return value && typeof value === 'object' ? value : {};
-  }
-
-  function setHealth(state, title, detail) {
-    const dot = element('health-dot');
-    dot.dataset.state = state || '';
-    element('health-title').textContent = title;
-    element('health-detail').textContent = detail;
-  }
-
-  async function request(path) {
-    currentConfig = normalizeConfig(await homebridge.getPluginConfig());
-    return await homebridge.request(path, currentConfig);
-  }
-
-  async function checkBridge() {
-    const button = element('health-button');
-    button.disabled = true;
-    setHealth('', 'Checking Hue Bridge…', 'Verifying the pinned local connection.');
-    try {
-      const result = await request('/bridge-health');
-      const checked = result.checkedAt ? new Date(result.checkedAt).toLocaleString() : 'just now';
-      setHealth('online', 'Hue Bridge online', `${result.lightCount} light(s) available · checked ${checked}`);
-    } catch (error) {
-      setHealth('offline', 'Hue Bridge unavailable', error?.message || String(error));
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  async function discoverLights() {
-    const button = element('discover-button');
-    button.disabled = true;
-    try {
-      const result = await request('/discover-lights');
-      setHealth('online', 'Hue Bridge online', `${result.lightCount} light(s) available`);
-      const lights = Array.isArray(result.lights) ? result.lights : [];
-      element('inventory-count').textContent = String(lights.length);
-      element('light-grid').innerHTML = lights.map((light) => {
-        const features = [];
-        if (light.features?.dimming) features.push('Dimming');
-        if (light.features?.colorTemperature) features.push('White temp');
-        if (light.features?.color) features.push('Color');
-        return `<div class="hmr-light-choice">
-          <div class="d-flex align-items-center justify-content-between gap-2">
-            <strong>${escapeHtml(light.name)}</strong>
-            <span class="badge ${light.on ? 'bg-success' : 'bg-secondary'}">${light.on ? 'On' : 'Off'}</span>
-          </div>
-          <div class="hmr-light-meta mt-1">${escapeHtml(light.id)}</div>
-          <div class="mt-1">${features.map((feature) => `<span class="badge bg-secondary hmr-feature-badge me-1">${escapeHtml(feature)}</span>`).join('')}</div>
-        </div>`;
-      }).join('') || '<div class="text-muted small">No Hue lights were returned by the bridge.</div>';
-      element('inventory').classList.remove('d-none');
-    } catch (error) {
-      setHealth('offline', 'Hue discovery failed', error?.message || String(error));
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  window.homebridge.addEventListener('configChanged', (event) => {
-    currentConfig = normalizeConfig(event.data);
-  });
-
-  element('health-button').addEventListener('click', checkBridge);
-  element('discover-button').addEventListener('click', discoverLights);
-
-  (async () => {
-    try {
-      currentConfig = normalizeConfig(await homebridge.getPluginConfig());
-      homebridge.showSchemaForm();
-    } finally {
-      homebridge.hideSpinner();
-    }
-  })();
-})();
-</script>
+<link rel="stylesheet" href="./style.css">
+<script src="./index.js"></script>
