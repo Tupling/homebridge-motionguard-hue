@@ -19,3 +19,7 @@ MotionGuard for Hue is designed to operate locally:
 - custom-UI light discovery runs through Homebridge's local plugin UI helper.
 
 A Homebridge host, Apple Home environment, router, Hue Bridge, or third-party motion-source plugin can still affect the overall security boundary. Keep those components updated and do not expose Homebridge administration ports directly to the public internet.
+
+## Dependency hygiene
+
+MotionGuard v0.8.1 does not bundle a direct Ring client. The experimental v0.8.0 Direct Ring path was removed after npm audit surfaced high-severity findings in its transitive WebRTC/IP dependency chain.

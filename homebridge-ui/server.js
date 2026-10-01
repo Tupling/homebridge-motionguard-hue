@@ -24,12 +24,32 @@ function publicLight(light) {
     id_v1: light.id_v1 || '',
     name: light.name || light.id,
     archetype: light.archetype || '',
+    ownerId: light.owner?.rid || '',
+    ownerType: light.owner?.rtype || '',
+    serviceId: Number.isFinite(light.serviceId) ? light.serviceId : null,
+    serviceName: light.serviceName || light.name || light.id,
+    serviceArchetype: light.serviceArchetype || '',
+    serviceFunction: light.serviceFunction || '',
+    serviceAssociation: light.serviceAssociation || '',
     on: Boolean(light.state?.on),
     features: {
       dimming: Boolean(light.features?.dimming),
       colorTemperature: Boolean(light.features?.colorTemperature),
       color: Boolean(light.features?.color),
     },
+  };
+}
+
+function publicFixture(fixture) {
+  return {
+    id: fixture.id,
+    name: fixture.name || fixture.id,
+    archetype: fixture.archetype || '',
+    product: fixture.product || {},
+    multiService: Boolean(fixture.multiService),
+    lightServiceCount: Number(fixture.lightServiceCount || fixture.lightServices?.length || 0),
+    unresolvedOwner: Boolean(fixture.unresolvedOwner),
+    lightServices: (fixture.lightServices || []).map(publicLight),
   };
 }
 
@@ -47,15 +67,19 @@ function publicLight(light) {
     async getInventory(payload) {
       try {
         const client = buildClient(payload);
-        const lights = await client.getLights();
-        const inventory = Object.values(lights)
+        const inventory = await client.getDeviceInventory();
+        const lights = Object.values(inventory.lights)
           .map(publicLight)
           .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        const fixtures = (inventory.fixtures || []).map(publicFixture);
         return {
           online: true,
           checkedAt: new Date().toISOString(),
-          lightCount: inventory.length,
-          lights: inventory,
+          lightCount: lights.length,
+          fixtureCount: fixtures.length,
+          multiServiceFixtureCount: fixtures.filter((fixture) => fixture.multiService).length,
+          lights,
+          fixtures,
         };
       } catch (error) {
         throw new RequestError(safeMessage(error));
@@ -72,6 +96,8 @@ function publicLight(light) {
         online: result.online,
         checkedAt: result.checkedAt,
         lightCount: result.lightCount,
+        fixtureCount: result.fixtureCount,
+        multiServiceFixtureCount: result.multiServiceFixtureCount,
       };
     }
   }

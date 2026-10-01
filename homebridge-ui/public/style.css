@@ -23,3 +23,13 @@
 .hmr-zone-services { font-size: .76rem; }
 
 .hmr-brand-icon { width: 56px; height: 56px; flex: 0 0 56px; border-radius: 14px; object-fit: cover; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+
+.hmr-fixture-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .75rem; }
+.hmr-fixture { border: 1px solid var(--bs-border-color); border-radius: .5rem; overflow: hidden; background: rgba(127,127,127,.02); }
+.hmr-fixture-head { padding: .7rem .8rem; border-bottom: 1px solid var(--bs-border-color); background: rgba(127,127,127,.04); }
+.hmr-fixture-services { padding: .35rem .8rem .55rem; }
+.hmr-service { padding: .6rem 0; border-bottom: 1px solid var(--bs-border-color); }
+.hmr-service:last-child { border-bottom: 0; }
+.hmr-service-override { margin-left: 1.5rem; padding: .45rem .55rem; border: 1px dashed var(--bs-border-color); border-radius: .4rem; }
+.hmr-device-inspector { margin: 0 .8rem .75rem; padding: .45rem .55rem; border: 1px dashed var(--bs-border-color); border-radius: .4rem; }
+.hmr-device-inspector .inspector-content { white-space: pre-wrap; word-break: break-all; font-family: var(--bs-font-monospace); }
