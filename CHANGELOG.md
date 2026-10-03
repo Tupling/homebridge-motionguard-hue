@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.3
+
+- Refreshed bundled MotionGuard banner and icon artwork with the approved high-resolution branding set.
+- Added approved MotionGuard badge and app-icon assets to the repository/package branding folder.
+- No Hue runtime, restore, zone identity, or automation behavior changes.
+
 ## 0.8.2
 
 - Fixed HomeKit/HAP accessory-name warnings by replacing the Unicode MotionGuard zone separator with an ASCII-safe hyphen.

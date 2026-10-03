@@ -12,7 +12,7 @@
   <img alt="Homebridge 2.x" src="https://img.shields.io/badge/Homebridge-2.x-491F59">
   <img alt="Node 22–26" src="https://img.shields.io/badge/Node-22--26-339933">
   <img alt="Hue API v2" src="https://img.shields.io/badge/Hue%20API-v2-00AEEF">
-  <img alt="Version 0.8.2" src="https://img.shields.io/badge/version-0.8.2-0B84F3">
+  <img alt="Version 0.8.3" src="https://img.shields.io/badge/version-0.8.3-0B84F3">
 </p>
 
 <p align="center">
@@ -35,10 +35,10 @@ When motion occurs, MotionGuard snapshots the selected Hue lights, applies a con
 
 It is built for people who want **security-style lighting behavior without sacrificing normal Hue scenes, colors, brightness, or automations**.
 
-> **Current release: v0.8.2**  
+> **Current release: v0.8.3**  
 > Package/platform compatibility names remain `homebridge-hue-motion-restore` and `HueMotionRestore` so existing Homebridge configurations and Apple Home accessory identities continue to work.
 
-v0.8.2 fixes HomeKit/HAP accessory-name warnings by publishing generated zone accessories as **`MotionGuard - <Zone Name>`** and sanitizing copied punctuation before handing names to HomeKit.
+v0.8.3 refreshes the bundled MotionGuard banner, icon, badge, and app-icon artwork with the approved high-resolution branding set. Runtime Hue behavior remains unchanged from v0.8.2.
 
 <p align="center">
   <img src="branding/nine3-digital-logo.jpg" alt="Nine 3 Digital, LLC" width="420">
@@ -410,39 +410,15 @@ The Dynamic Zone Manager can convert a legacy configuration into a managed zone 
 
 ---
 
-## Ubuntu / native Homebridge local-plugin upgrade
+## Ubuntu / native Homebridge npm install or update
 
-Example workflow:
+Install or update from npm:
 
 ```bash
-rm -rf ~/Downloads/hmr082
-mkdir -p ~/Downloads/hmr082
-unzip ~/Downloads/homebridge-hue-motion-restore-0.8.2.zip -d ~/Downloads/hmr082
-cd ~/Downloads/hmr082/homebridge-hue-motion-restore
-
 export PATH="/opt/homebridge/bin:$PATH"
-npm run check
-```
 
-Replace the existing source:
-
-```bash
-sudo rsync -a --delete \
-  ~/Downloads/hmr082/homebridge-hue-motion-restore/ \
-  /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore/
-
-sudo chown -R homebridge:homebridge \
-  /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
-```
-
-Install the pinned custom-UI helper as the Homebridge service user:
-
-```bash
 sudo -u homebridge env PATH="/opt/homebridge/bin:$PATH" \
-  /opt/homebridge/bin/npm ci \
-  --omit=dev \
-  --ignore-scripts \
-  --prefix /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore
+  /opt/homebridge/bin/npm install -g homebridge-hue-motion-restore@latest
 ```
 
 Restart Homebridge:
@@ -451,13 +427,13 @@ Restart Homebridge:
 sudo hb-service restart
 ```
 
-An existing symlink at:
+If you previously installed MotionGuard as a local plugin, remove the old symlink before switching to npm:
 
-```text
-/var/lib/homebridge/node_modules/homebridge-hue-motion-restore
+```bash
+sudo rm -f /var/lib/homebridge/node_modules/homebridge-hue-motion-restore
 ```
 
-can remain in place.
+Configuration remains valid because the package name and platform alias are unchanged.
 
 ---
 
@@ -529,6 +505,8 @@ Primary project assets are stored in [`branding/`](branding/).
 
 - `banner.png` — README / project banner
 - `icon.png` — MotionGuard icon
+- `badge.png` — MotionGuard badge artwork
+- `app-icon.png` — MotionGuard app-icon artwork
 - `nine3-digital-logo.jpg` — Nine 3 Digital publisher logo
 - `nine3-digital-logo-square.jpg` — square Nine 3 Digital publisher logo
 

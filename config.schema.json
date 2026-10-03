@@ -3,8 +3,8 @@
   "pluginType": "platform",
   "singular": true,
   "customUi": true,
-  "headerDisplay": "### MotionGuard for Hue v0.8.2 — HomeKit Name Compatibility\nLive Hue state caching, parallel light writes, precise performance timing, clean Apple Home controls, and ASCII-safe zone accessory names.",
-  "footerDisplay": "Existing Apple Home Motion Trigger identities are preserved. v0.8.2 keeps the Hue-side latency improvements and fixes HomeKit accessory-name warnings.",
+  "headerDisplay": "### MotionGuard for Hue v0.8.3 — Branding Refresh\nLive Hue state caching, parallel light writes, precise performance timing, clean Apple Home controls, and refreshed MotionGuard artwork.",
+  "footerDisplay": "Existing Apple Home Motion Trigger identities are preserved. v0.8.3 refreshes bundled MotionGuard branding assets with no runtime behavior changes.",
   "x-branding": {
     "imagePath": "branding/banner.png",
     "iconPath": "branding/icon.png",
