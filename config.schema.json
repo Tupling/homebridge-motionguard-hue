@@ -3,8 +3,8 @@
   "pluginType": "platform",
   "singular": true,
   "customUi": true,
-  "headerDisplay": "### MotionGuard for Hue v0.8.1 \u2014 Low-Latency Motion Path\nLive Hue state caching, parallel light writes, precise performance timing, and the same clean Apple Home controls.",
-  "footerDisplay": "Existing Apple Home Motion Trigger identities are preserved. v0.8.1 removes the experimental Direct Ring dependency while retaining all Hue-side latency improvements.",
+  "headerDisplay": "### MotionGuard for Hue v0.8.2 — HomeKit Name Compatibility\nLive Hue state caching, parallel light writes, precise performance timing, clean Apple Home controls, and ASCII-safe zone accessory names.",
+  "footerDisplay": "Existing Apple Home Motion Trigger identities are preserved. v0.8.2 keeps the Hue-side latency improvements and fixes HomeKit accessory-name warnings.",
   "x-branding": {
     "imagePath": "branding/banner.png",
     "iconPath": "branding/icon.png",
@@ -219,9 +219,9 @@
           "advanced"
         ],
         "enumNames": [
-          "Minimal \u2014 Enabled, Pause, Motion Trigger",
-          "Standard \u2014 Recommended",
-          "Advanced \u2014 Add Protect, Test, Restore Now"
+          "Minimal — Enabled, Pause, Motion Trigger",
+          "Standard — Recommended",
+          "Advanced — Add Protect, Test, Restore Now"
         ],
         "description": "Controls how many MotionGuard services are exposed inside each zone accessory in Apple Home."
       },
