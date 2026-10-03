@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.2
+
+- Fixed HomeKit/HAP accessory-name warnings by replacing the Unicode MotionGuard zone separator with an ASCII-safe hyphen.
+- Added HomeKit name sanitization for generated zone accessory names so copied punctuation or symbols in zone names do not prevent accessories from being added to Apple Home.
+- No Hue runtime, restore, zone identity, or automation behavior changes.
+
 ## 0.8.1
 
 - Removed the experimental Direct Ring provider and `ring-client-api` dependency after npm audit reported high-severity findings in its transitive WebRTC/IP dependency chain.
