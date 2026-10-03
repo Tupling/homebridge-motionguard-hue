@@ -38,7 +38,7 @@ It is built for people who want **security-style lighting behavior without sacri
 > **Current release: v0.8.3**  
 > Package/platform compatibility names remain `homebridge-hue-motion-restore` and `HueMotionRestore` so existing Homebridge configurations and Apple Home accessory identities continue to work.
 
-v0.8.3 refreshes the bundled MotionGuard banner, icon, badge, and app-icon artwork with the approved high-resolution branding set. Runtime Hue behavior remains unchanged from v0.8.2.
+v0.8.3 refreshes the bundled MotionGuard banner and icon artwork with the approved high-resolution branding set. Runtime Hue behavior remains unchanged from v0.8.2.
 
 <p align="center">
   <img src="branding/nine3-digital-logo.jpg" alt="Nine 3 Digital, LLC" width="420">
@@ -505,8 +505,6 @@ Primary project assets are stored in [`branding/`](branding/).
 
 - `banner.png` — README / project banner
 - `icon.png` — MotionGuard icon
-- `badge.png` — MotionGuard badge artwork
-- `app-icon.png` — MotionGuard app-icon artwork
 - `nine3-digital-logo.jpg` — Nine 3 Digital publisher logo
 - `nine3-digital-logo-square.jpg` — square Nine 3 Digital publisher logo
 
