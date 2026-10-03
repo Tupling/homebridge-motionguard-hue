@@ -12,7 +12,7 @@
   <img alt="Homebridge 2.x" src="https://img.shields.io/badge/Homebridge-2.x-491F59">
   <img alt="Node 22–26" src="https://img.shields.io/badge/Node-22--26-339933">
   <img alt="Hue API v2" src="https://img.shields.io/badge/Hue%20API-v2-00AEEF">
-  <img alt="Version 0.8.1" src="https://img.shields.io/badge/version-0.8.1-0B84F3">
+  <img alt="Version 0.8.1" src="https://img.shields.io/badge/version-0.8.2-0B84F3">
 </p>
 
 <p align="center">
@@ -35,8 +35,10 @@ When motion occurs, MotionGuard snapshots the selected Hue lights, applies a con
 
 It is built for people who want **security-style lighting behavior without sacrificing normal Hue scenes, colors, brightness, or automations**.
 
-> **Current release: v0.8.1**  
+> **Current release: v0.8.2**  
 > Package/platform compatibility names remain `homebridge-hue-motion-restore` and `HueMotionRestore` so existing Homebridge configurations and Apple Home accessory identities continue to work.
+
+v0.8.2 fixes HomeKit/HAP accessory-name warnings by publishing generated zone accessories as **`MotionGuard - <Zone Name>`** and sanitizing copied punctuation before handing names to HomeKit.
 
 ## Why MotionGuard?
 
@@ -284,7 +286,7 @@ For each zone:
 1. Open **Home → Automation → + → A Sensor Detects Something**.
 2. Select the camera or motion sensor.
 3. Choose **Detects Motion**.
-4. Select the matching **MotionGuard — `<Zone Name>`** accessory.
+4. Select the matching **MotionGuard - `<Zone Name>`** accessory.
 5. Select its **Motion Trigger** service.
 6. Set **Motion Trigger** to **ON**.
 7. Save.
@@ -296,7 +298,7 @@ Do **not** add an OFF action. MotionGuard resets Motion Trigger automatically so
 ```text
 Garage camera motion
         ↓
-MotionGuard — Garage / Motion Trigger ON
+MotionGuard - Garage / Motion Trigger ON
         ↓
 Garage Hue lights → configured motion state
         ↓
@@ -405,10 +407,10 @@ The Dynamic Zone Manager can convert a legacy configuration into a managed zone 
 Example workflow:
 
 ```bash
-rm -rf ~/Downloads/hmr081
-mkdir -p ~/Downloads/hmr081
-unzip ~/Downloads/homebridge-hue-motion-restore-0.8.1.zip -d ~/Downloads/hmr081
-cd ~/Downloads/hmr081/homebridge-hue-motion-restore
+rm -rf ~/Downloads/hmr082
+mkdir -p ~/Downloads/hmr082
+unzip ~/Downloads/homebridge-hue-motion-restore-0.8.2.zip -d ~/Downloads/hmr082
+cd ~/Downloads/hmr082/homebridge-hue-motion-restore
 
 export PATH="/opt/homebridge/bin:$PATH"
 npm run check
@@ -418,7 +420,7 @@ Replace the existing source:
 
 ```bash
 sudo rsync -a --delete \
-  ~/Downloads/hmr081/homebridge-hue-motion-restore/ \
+  ~/Downloads/hmr082/homebridge-hue-motion-restore/ \
   /var/lib/homebridge/local-plugins/homebridge-hue-motion-restore/
 
 sudo chown -R homebridge:homebridge \
