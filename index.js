@@ -43,6 +43,34 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function sanitizeHomeKitName(value, fallback = 'MotionGuard', maxLength = 64) {
+  const normalized = String(value ?? '')
+    .normalize('NFKD')
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/[^A-Za-z0-9 .,'"-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  let safe = normalized
+    .replace(/^[^A-Za-z0-9]+/, '')
+    .replace(/[^A-Za-z0-9]+$/, '');
+
+  if (safe.length > maxLength) {
+    safe = safe.slice(0, maxLength)
+      .trim()
+      .replace(/[^A-Za-z0-9]+$/, '');
+  }
+
+  return safe || fallback;
+}
+
+function motionGuardAccessoryName(zoneName) {
+  const safeZoneName = sanitizeHomeKitName(zoneName, 'Zone');
+  return sanitizeHomeKitName(`MotionGuard - ${safeZoneName}`, 'MotionGuard Zone');
+}
+
 module.exports = (api) => {
   api.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, HueMotionRestorePlatform);
 };
@@ -311,7 +339,7 @@ class HueMotionRestorePlatform {
       const seed = zone.legacyTrigger
         ? TRIGGER_UUID_SEED
         : `hue-motion-restore:zone-trigger:${zone.id}`;
-      const displayName = `MotionGuard — ${zone.name}`;
+      const displayName = motionGuardAccessoryName(zone.name);
       const accessory = this.getOrCreateAccessory(seed, displayName);
       accessory.context.hmrRole = 'zone-controller';
       accessory.context.zoneId = zone.id;
