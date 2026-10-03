@@ -1,6 +1,6 @@
 {
   "name": "homebridge-hue-motion-restore",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "MotionGuard for Hue: low-latency Homebridge motion lighting with live Hue state caching, parallel writes, clean Apple Home controls, and exact state restore.",
   "main": "index.js",
   "license": "MIT",
