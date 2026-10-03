@@ -638,7 +638,7 @@
             <label class="form-check-label">Primary Zone</label>
           </div>
         </div>
-        <div class="text-muted hmr-zone-services mb-3">Apple Home accessory: MotionGuard — ${zone.name || 'Zone'} · services depend on Apple Home Exposure profile</div>
+        <div class="text-muted hmr-zone-services mb-3">Apple Home accessory: MotionGuard - ${zone.name || 'Zone'} · services depend on Apple Home Exposure profile</div>
         <div class="hmr-muted-box mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
             <div>
