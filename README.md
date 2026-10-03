@@ -12,7 +12,7 @@
   <img alt="Homebridge 2.x" src="https://img.shields.io/badge/Homebridge-2.x-491F59">
   <img alt="Node 22–26" src="https://img.shields.io/badge/Node-22--26-339933">
   <img alt="Hue API v2" src="https://img.shields.io/badge/Hue%20API-v2-00AEEF">
-  <img alt="Version 0.8.1" src="https://img.shields.io/badge/version-0.8.2-0B84F3">
+  <img alt="Version 0.8.2" src="https://img.shields.io/badge/version-0.8.2-0B84F3">
 </p>
 
 <p align="center">
