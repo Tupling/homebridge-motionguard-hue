@@ -531,7 +531,6 @@ Primary project assets are stored in [`branding/`](branding/).
 - `icon.png` — MotionGuard icon
 - `nine3-digital-logo.jpg` — Nine 3 Digital publisher logo
 - `nine3-digital-logo-square.jpg` — square Nine 3 Digital publisher logo
-- `social-preview.jpg` — repository sharing / social preview artwork
 
 ---
 
