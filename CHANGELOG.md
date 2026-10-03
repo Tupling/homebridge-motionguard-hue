@@ -78,3 +78,13 @@ All notable changes to MotionGuard for Hue are documented here.
 
 ### Added
 - Public GitHub/npm project metadata.
+- Absolute GitHub-hosted branding URLs alongside bundled local branding assets.
+- GitHub Actions CI for supported Node LTS releases.
+- Security, contribution, and issue-reporting documentation.
+
+### Changed
+- Public product branding remains **MotionGuard for Hue** while the compatibility package/platform IDs remain `homebridge-hue-motion-restore` and `HueMotionRestore`.
+- Engine declarations target Homebridge 2.x and current supported Node LTS releases.
+
+### Unchanged
+- Motion snapshot/restore behavior, dynamic zones, secure Hue pairing, TLS pinning, per-zone test/status, restart recovery, and HomeKit accessory identities.
