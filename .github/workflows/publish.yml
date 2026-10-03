@@ -16,10 +16,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+          registry-url: https://registry.npmjs.org
           cache: npm
       - name: Ensure npm supports trusted publishing
         run: npm install --global npm@11
       - run: npm ci
       - run: npm run check
+      - name: Verify release version matches package
+        run: |
+          node -e "const pkg=require('./package.json'); const tag=process.env.GITHUB_REF_NAME.replace(/^v/, ''); if (pkg.version !== tag) throw new Error(`Release tag ${tag} does not match package version ${pkg.version}`);"
+      - name: Check whether this version is already published
+        id: published
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "homebridge-hue-motion-restore@$VERSION" version > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "homebridge-hue-motion-restore@$VERSION is already published; skipping npm publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish package
+        if: steps.published.outputs.exists != 'true'
         run: npm publish --access public --provenance
