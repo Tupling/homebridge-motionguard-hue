@@ -27,7 +27,7 @@
     "@homebridge/plugin-ui-utils": "2.2.6"
   },
   "author": {
-    "name": "Dale Tupling",
+    "name": "Nine 3 Digital, LLC",
     "url": "https://github.com/Tupling"
   },
   "repository": {
@@ -56,5 +56,11 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "contributors": [
+    {
+      "name": "Dale Tupling",
+      "url": "https://github.com/Tupling"
+    }
+  ]
 }

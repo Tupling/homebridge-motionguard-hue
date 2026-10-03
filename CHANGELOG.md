@@ -5,6 +5,7 @@
 - Fixed HomeKit/HAP accessory-name warnings by replacing the Unicode MotionGuard zone separator with an ASCII-safe hyphen.
 - Added HomeKit name sanitization for generated zone accessory names so copied punctuation or symbols in zone names do not prevent accessories from being added to Apple Home.
 - No Hue runtime, restore, zone identity, or automation behavior changes.
+- Added Nine 3 Digital, LLC publisher metadata and repository branding assets.
 
 ## 0.8.1
 

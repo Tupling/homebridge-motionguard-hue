@@ -40,6 +40,14 @@ It is built for people who want **security-style lighting behavior without sacri
 
 v0.8.2 fixes HomeKit/HAP accessory-name warnings by publishing generated zone accessories as **`MotionGuard - <Zone Name>`** and sanitizing copied punctuation before handing names to HomeKit.
 
+<p align="center">
+  <img src="branding/nine3-digital-logo.jpg" alt="Nine 3 Digital, LLC" width="420">
+</p>
+
+<p align="center">
+  Published by <strong>Nine 3 Digital, LLC</strong>; maintained by Dale Tupling.
+</p>
+
 ## Why MotionGuard?
 
 | Capability | MotionGuard for Hue |
@@ -496,6 +504,14 @@ CI runs through GitHub Actions on the supported project path.
 
 ---
 
+## Publisher
+
+MotionGuard for Hue is published by **Nine 3 Digital, LLC** and maintained by Dale Tupling.
+
+The npm package name remains `homebridge-hue-motion-restore` for Homebridge compatibility and existing-user upgrades.
+
+---
+
 ## Project links
 
 - [Changelog](CHANGELOG.md)
@@ -513,6 +529,8 @@ Primary project assets are stored in [`branding/`](branding/).
 
 - `banner.png` — README / project banner
 - `icon.png` — MotionGuard icon
+- `nine3-digital-logo.jpg` — Nine 3 Digital publisher logo
+- `nine3-digital-logo-square.jpg` — square Nine 3 Digital publisher logo
 - `social-preview.jpg` — repository sharing / social preview artwork
 
 ---

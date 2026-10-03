@@ -4,7 +4,7 @@
 
 Please do **not** open a public GitHub issue for a suspected security vulnerability.
 
-Use GitHub's private vulnerability reporting feature for this repository when available. If private reporting is unavailable, contact the maintainer through the GitHub profile linked in this repository and avoid including credentials, Hue application keys, HomeKit setup codes, or private network details in public posts.
+Use GitHub's private vulnerability reporting feature for this repository when available. If private reporting is unavailable, contact Nine 3 Digital, LLC or the maintainer through the GitHub profile linked in this repository and avoid including credentials, Hue application keys, HomeKit setup codes, or private network details in public posts.
 
 ## Security model
 

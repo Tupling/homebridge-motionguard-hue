@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve MotionGuard for Hue.
+Thanks for helping improve MotionGuard for Hue. This project is published by Nine 3 Digital, LLC and maintained by Dale Tupling.
 
 ## Before opening an issue
 
