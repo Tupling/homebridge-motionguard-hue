@@ -22,4 +22,4 @@ A Homebridge host, Apple Home environment, router, Hue Bridge, or third-party mo
 
 ## Dependency hygiene
 
-MotionGuard v0.8.1 does not bundle a direct Ring client. The experimental v0.8.0 Direct Ring path was removed after npm audit surfaced high-severity findings in its transitive WebRTC/IP dependency chain.
+MotionGuard v0.8.2 does not bundle a direct Ring client. The experimental v0.8.0 Direct Ring path was removed after npm audit surfaced high-severity findings in its transitive WebRTC/IP dependency chain.
