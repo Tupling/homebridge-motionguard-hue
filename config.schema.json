@@ -3,8 +3,8 @@
   "pluginType": "platform",
   "singular": true,
   "customUi": true,
-  "headerDisplay": "### MotionGuard for Hue v0.8.3 — Branding Refresh\nLive Hue state caching, parallel light writes, precise performance timing, clean Apple Home controls, and refreshed MotionGuard artwork.",
-  "footerDisplay": "Existing Apple Home Motion Trigger identities are preserved. v0.8.3 refreshes bundled MotionGuard branding assets with no runtime behavior changes.",
+  "headerDisplay": "### MotionGuard for Hue v0.8.4 — Hue Color Preservation\nKeep existing Hue colors during motion, restore reliably, and retain the low-latency Apple Home workflow.",
+  "footerDisplay": "Existing zones without Motion Color Mode keep Bright White for backwards compatibility. Set Preserve Existing Color for a green-at-sunset automation. Apple Home accessories remain unchanged.",
   "x-branding": {
     "imagePath": "branding/banner.png",
     "iconPath": "branding/icon.png",
@@ -104,6 +104,14 @@
                 "title": "Light Name or ID",
                 "type": "string"
               }
+            },
+            "colorMode": {
+              "title": "Motion Color Mode",
+              "type": "string",
+              "enum": ["preserve", "white"],
+              "enumNames": ["Preserve Existing Color", "Bright White"],
+              "default": "white",
+              "description": "Preserve Existing Color keeps the light's active or most recently selected XY/white color. Existing zones default to Bright White; new UI zones use Preserve Existing Color."
             },
             "brightness": {
               "title": "Zone Brightness Override (%)",

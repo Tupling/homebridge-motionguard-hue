@@ -907,7 +907,7 @@ class HueMotionRestorePlatform {
         );
         runtime.expectedStates.set(
           id,
-          buildMotionState(light, lightEffective.brightness, lightEffective.colorTemperature),
+          buildMotionState(light, lightEffective.brightness, lightEffective.colorTemperature, lightEffective.colorMode),
         );
       }
 
@@ -916,7 +916,8 @@ class HueMotionRestorePlatform {
       this.persistActiveOverrides();
       this.updateZoneActivity(zoneId, true);
 
-      this.log.info(`Motion pulse (${source}) — zone "${zone.name}" captured ${runtime.snapshot.size} light state(s). Applying bright white.`);
+      const colorAction = effective.colorMode === 'preserve' ? 'Preserving existing Hue colors.' : 'Applying bright white.';
+      this.log.info(`Motion pulse (${source}) — zone "${zone.name}" captured ${runtime.snapshot.size} light state(s). ${colorAction}`);
 
       const writeStarted = process.hrtime.bigint();
       const writeResults = await Promise.allSettled(selected.map(async ({ id, light }) => {
@@ -1100,14 +1101,33 @@ class HueMotionRestorePlatform {
 
       this.log.info(`Restoring previous Hue state for zone "${zoneId}" (${reason}).`);
       const restoreJobs = [];
+      let refreshedLights = null;
+      let refreshedOnce = false;
 
       for (const [id, saved] of runtime.snapshot.entries()) {
         if (protect) {
-          const current = currentLights?.[id];
           const expected = runtime.expectedStates.get(id);
+          let current = currentLights?.[id];
           if (!current || !stateLooksLikeMotion(current.state, expected)) {
-            this.log.info(`Leaving ${saved.name} [${id}] alone because it changed while motion lighting was active or its state could not be verified.`);
-            continue;
+            // Live event-stream updates can arrive out of order. Confirm any
+            // apparent manual change with an authoritative bridge read before
+            // deciding to skip the restore. Normal matches stay cache-fast.
+            if (!refreshedOnce) {
+              refreshedOnce = true;
+              try {
+                refreshedLights = await this.hue.getLights();
+              } catch (error) {
+                this.log.warn(`Could not refresh Hue state while checking restoration for zone "${zoneId}": ${error.message}`);
+              }
+            }
+            current = refreshedLights?.[id];
+            if (!current || !stateLooksLikeMotion(current.state, expected)) {
+              this.log.info(`Leaving ${saved.name} [${id}] alone because it changed while motion lighting was active or its state could not be verified.`);
+              if (this.config.debug) {
+                this.log.info(`Restore check for ${saved.name} [${id}]: expected ${JSON.stringify(expected)}; current ${JSON.stringify(current?.state || null)}.`);
+              }
+              continue;
+            }
           }
         }
 

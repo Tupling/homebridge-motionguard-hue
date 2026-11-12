@@ -101,6 +101,17 @@ MotionGuard preserves the state that existed before motion:
 
 The first snapshot is retained while motion continues, so repeated triggers extend the timer instead of replacing the state that should eventually be restored.
 
+### Motion color behavior (v0.8.4)
+
+For each managed zone, open **Per-zone overrides → Motion Color Mode** in Homebridge:
+
+- **Preserve Existing Color**: activate lights using the last Hue XY color or white temperature while applying your configured motion brightness. For example, a HomeKit sunset automation can set the outdoor light to green, and a Ring motion pulse will keep it green.
+- **Bright White**: retain the existing security-light behavior using the configured white temperature.
+
+Existing zones without a color-mode setting **continue using Bright White**, so upgrading does not silently change their behavior. Newly created zones select Preserve Existing Color. To fix a green-at-sunset setup, select Preserve Existing Color on its existing zone and save/restart Homebridge.
+
+When **Protect Manual Changes** is enabled, MotionGuard first compares the Hue state to its expected motion state. If the event cache disagrees, it checks the bridge once before skipping restoration; a genuine manual change is still protected. Hue Bridge availability is required for this fallback verification.
+
 ### Low-latency Hue path
 
 v0.8.1 retains the low-latency Hue improvements introduced in v0.8.0:

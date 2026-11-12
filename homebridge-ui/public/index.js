@@ -78,6 +78,8 @@
           legacyTrigger: Boolean(zone?.legacyTrigger),
           lights: Array.isArray(zone?.lights) ? zone.lights.map(String) : [],
           lightSettings: zone?.lightSettings && typeof zone.lightSettings === 'object' && !Array.isArray(zone.lightSettings) ? clone(zone.lightSettings) : {},
+          // Unconfigured existing zones retain their original bright-white behavior.
+          colorMode: zone?.colorMode === 'preserve' ? 'preserve' : 'white',
           ...(zone?.brightness !== undefined ? { brightness: Number(zone.brightness) } : {}),
           ...(zone?.colorTemperature !== undefined ? { colorTemperature: Number(zone.colorTemperature) } : {}),
           ...(zone?.delaySeconds !== undefined ? { delaySeconds: Number(zone.delaySeconds) } : {}),
@@ -162,6 +164,7 @@
       legacyTrigger: true,
       lights: legacyLights,
       lightSettings: {},
+      colorMode: 'white',
     }];
     config.lights = [];
     return true;
@@ -176,6 +179,8 @@
       legacyTrigger: false,
       lights: [],
       lightSettings: {},
+      // New zones preserve their Hue color; existing zones remain bright white.
+      colorMode: 'preserve',
     };
   }
 
@@ -715,16 +720,31 @@
     renderLights(zone, $('.lights-list', el));
 
     const overrides = $('.overrides', el);
+    const colorMode = document.createElement('div');
+    colorMode.innerHTML = `
+      <label class="form-label small">Motion Color Mode</label>
+      <select class="form-select form-select-sm">
+        <option value="preserve">Preserve Existing Color</option>
+        <option value="white">Bright White</option>
+      </select>
+      <div class="form-text">Preserve uses the Hue light's last color, including when the light was off.</div>
+    `;
+    const colorModeSelect = $('select', colorMode);
+    colorModeSelect.value = zone.colorMode === 'preserve' ? 'preserve' : 'white';
+    colorModeSelect.addEventListener('change', () => {
+      zone.colorMode = colorModeSelect.value;
+      scheduleSync();
+    });
     const brightness = zoneNumberInput('Brightness (%)', 'brightness', zone.brightness, 1, 100, 1);
     brightness.zone = zone;
-    const temp = zoneNumberInput('White Temperature (mirek)', 'colorTemperature', zone.colorTemperature, 153, 500, 1);
+    const temp = zoneNumberInput('Bright White Temperature (mirek)', 'colorTemperature', zone.colorTemperature, 153, 500, 1);
     temp.zone = zone;
     const delay = zoneNumberInput('Restore Delay (seconds)', 'delaySeconds', zone.delaySeconds, 5, 3600, 1);
     delay.zone = zone;
     const max = zoneNumberInput('Maximum Override (seconds)', 'maxOverrideSeconds', zone.maxOverrideSeconds, 60, 7200, 1);
     max.zone = zone;
     const night = zoneOptionalBoolean('Night Only', 'nightOnly', zone);
-    [brightness, temp, delay, max, night].forEach((item) => overrides.appendChild(item));
+    [colorMode, brightness, temp, delay, max, night].forEach((item) => overrides.appendChild(item));
 
     return el;
   }
