@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.4 (proposed)
+
+- Added a per-zone Motion Color Mode (Preserve Existing Color or Bright White) in Homebridge configuration.
+- Preserves a light's last XY/CT color through a motion event, including when the light starts off.
+- Corrected Hue API v2 event-stream color-mode tracking using the mirek_valid flag when both XY and remembered white temperature are present.
+- Added color-aware restore protection and a single authoritative Hue Bridge read when cached states disagree before skipping restoration.
+- Added regression tests for color preservation, manual changes, event cache updates, and configuration compatibility.
+- Existing zones retain Bright White until explicitly changed; newly added zones default to Preserve Existing Color.
+- Preserved existing HomeKit UUIDs, TLS security, live-state caching, and parallel light writes.
+
 ## 0.8.3
 
 - Refreshed bundled MotionGuard banner and icon artwork with the approved high-resolution branding set.
